@@ -4,37 +4,26 @@ import java.math.BigInteger;
 
 public class Sum {
     public static void main(String[] args) {
-        ArrayList<String> list = new ArrayList<String>();
+        int sum = 0;
+        StringBuilder split_arg = new StringBuilder();
 
         for (String arg : args) {
-            ArrayList<StringBuilder> split_arg = new ArrayList<StringBuilder>();
-            split_arg.add(new StringBuilder());
-
             for (int i = 0; i < arg.length(); i++) {
                 char ch = arg.charAt(i);
                 if (Character.isWhitespace(ch)) {
-                    if (split_arg.get(split_arg.size() - 1).length() != 0) {
-                        split_arg.add(new StringBuilder());
+                    if (split_arg.length() != 0) {
+                        sum += Integer.valueOf(split_arg.toString());
+                        split_arg.setLength(0);
                     }
                 } else {
-                    split_arg.get(split_arg.size() - 1).append(ch);
+                    split_arg.append(ch);
                 }
             }
-
-            for (var el : split_arg) {
-                String str_el = el.toString();
-                if (el.length() == 0) {
-                    continue;
-                }
-                list.add(str_el);
+            if (split_arg.length() != 0) {
+                sum += Integer.valueOf(split_arg.toString());
+                split_arg.setLength(0);
             }
         }
-
-        int ans = 0;
-        for (var el : list) {
-                var elInt = Integer.valueOf(el);
-                ans += elInt;
-        }
-        System.out.println(ans);
+        System.out.println(sum);
     }
 }
