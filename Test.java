@@ -19,10 +19,7 @@ public class Test {
         }
     }
     public static void main(String[] args) {
-        Lol lol = new Lol(4, 5, 2);
-        System.out.println(lol);
-        int[] arr = new int[3];
-        System.arraycopy(lol.asArray(), 0, arr, 0, 3);
-        System.out.println(Arrays.toString(arr));
+        String hex = "0x1";
+        System.out.println(Long.parseUnsignedLong(hex, 16));
     }
 }
