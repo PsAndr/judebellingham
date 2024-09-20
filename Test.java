@@ -1,4 +1,7 @@
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class Test {
     public static class Lol{
@@ -18,8 +21,11 @@ public class Test {
             return String.format("%d | %d | %d", a, b, c);
         }
     }
-    public static void main(String[] args) {
-        String hex = "0x1";
-        System.out.println(Long.parseUnsignedLong(hex, 16));
+    public static void main(String[] args)  {
+        int[] arr = new int[10000];
+        // System.out.println(Arrays.toString(arr));
+        while (true) {
+
+        }
     }
 }
