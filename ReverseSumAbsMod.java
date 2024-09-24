@@ -30,11 +30,12 @@ public class ReverseSumAbsMod {
         Scanner scanner = new Scanner(System.in);
 
         List<int[]> array = new ArrayList<>();
-        List<Integer> buffer = new ArrayList<>();
 
         int maxLengthLine = 0;
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
+            array.add(new int[getCountNumbers(line)]);
+            int indexNum = 0;
 
             int lastIndex = -1;
             for (int i = 0; i < line.length(); i++) {
@@ -42,21 +43,15 @@ public class ReverseSumAbsMod {
 
                 if (!Character.isDigit(ch) && ch != '-') {
                     if (i - lastIndex > 1) {
-                        buffer.add(Integer.parseInt(line.substring(lastIndex + 1, i)));
+                        array.getLast()[indexNum++] = Integer.parseInt(line.substring(lastIndex + 1, i));
                     }
                     lastIndex = i;
                 }
             }
             if (line.length() - lastIndex > 1) {
-                buffer.add(Integer.parseInt(line.substring(lastIndex + 1)));
+                array.getLast()[indexNum] = Integer.parseInt(line.substring(lastIndex + 1));
             }
-            array.add(new int[buffer.size()]);
-            for (int i = 0; i < buffer.size(); i++) {
-                array.getLast()[i] = buffer.get(i);
-            }
-
-            maxLengthLine = Math.max(maxLengthLine, buffer.size());
-            buffer.clear();
+            maxLengthLine = Math.max(maxLengthLine, array.getLast().length);
         }
 
         int[] sumLines = new int[array.size()];
