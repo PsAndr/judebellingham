@@ -26,65 +26,10 @@ public class WordStatInput {
             }
         }
 
-        public static class MyArrayList implements Iterable<ContainerElement> {
-            private ContainerElement[] array;
-            private int capacity;
-            private int size;
-
-            public MyArrayList() {
-                size = 0;
-                capacity = 2;
-                array = new ContainerElement[2];
-            }
-
-            public int size() {
-                return size;
-            }
-
-            public void add(ContainerElement newElement) {
-                array[size++] = newElement;
-                if (size == capacity) {
-                    capacity *= 2;
-                    ContainerElement[] tempArray = new ContainerElement[capacity];
-                    System.arraycopy(array, 0, tempArray, 0, size);
-                    array = tempArray;
-                }
-            }
-
-            public ContainerElement get(int index) {
-                if (index >= 0 && index < size) {
-                    return array[index];
-                }
-                throw new IndexOutOfBoundsException();
-            }
-
-            @Override
-            public Iterator<ContainerElement> iterator() {
-                return new IteratorMyArrayList();
-            }
-
-            class IteratorMyArrayList implements Iterator<ContainerElement> {
-
-                private int index = 0;
-
-                public boolean hasNext() {
-                    return index < size();
-                }
-
-                public ContainerElement next() {
-                    return get(index++);
-                }
-
-                public void remove() {
-                    throw new UnsupportedOperationException("not supported yet");
-                }
-            }
-        }
-
-        private final MyArrayList elements;
+        private final List<ContainerElement> elements;
 
         public MyContainer() {
-            elements = new MyArrayList();
+            elements = new ArrayList<>();
         }
 
         public void addWord(String word) {
@@ -124,7 +69,6 @@ public class WordStatInput {
             try {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // System.err.println(line);
                     int lastInd = -1;
                     for (int i = 0; i < line.length(); i++) {
                         char ch = line.charAt(i);
@@ -133,7 +77,6 @@ public class WordStatInput {
                                 ch != '\'') {
                             if (i - lastInd > 1) {
                                 String word = line.substring(lastInd + 1, i).toLowerCase();
-                                // System.err.println(word);
                                 container.addWord(word);
                             }
                             lastInd = i;
@@ -141,7 +84,6 @@ public class WordStatInput {
                     }
                     if (line.length() - lastInd > 1) {
                         String word = line.substring(lastInd + 1).toLowerCase();
-                        // System.err.println(word);
                         container.addWord(word);
                     }
                 }
