@@ -1,6 +1,5 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class WordStatInput {
@@ -112,40 +111,51 @@ public class WordStatInput {
     }
 
     public static void main(String[] args) {
-        Scanner scanner;
-        try {
-            File file = new File(args[0]);
-            scanner = new Scanner(file);
-        } catch (IOException ex) {
-            return;
-        }
-
         MyContainer container = new MyContainer();
-
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            // System.err.println(line);
-            int lastInd = -1;
-            for (int i = 0; i < line.length(); i++) {
-                char ch = line.charAt(i);
-                int chType = Character.getType(ch);
-                if (!Character.isLetter(ch) && Character.DASH_PUNCTUATION != chType &&
-                    ch != '\'') {
-                    if (i - lastInd > 1) {
-                        String word = line.substring(lastInd + 1, i).toLowerCase();
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(
+                    new InputStreamReader(
+                            new FileInputStream(args[0]),
+                            StandardCharsets.UTF_8
+                    ),
+                    1024
+            );
+            try {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // System.err.println(line);
+                    int lastInd = -1;
+                    for (int i = 0; i < line.length(); i++) {
+                        char ch = line.charAt(i);
+                        int chType = Character.getType(ch);
+                        if (!Character.isLetter(ch) && Character.DASH_PUNCTUATION != chType &&
+                                ch != '\'') {
+                            if (i - lastInd > 1) {
+                                String word = line.substring(lastInd + 1, i).toLowerCase();
+                                // System.err.println(word);
+                                container.addWord(word);
+                            }
+                            lastInd = i;
+                        }
+                    }
+                    if (line.length() - lastInd > 1) {
+                        String word = line.substring(lastInd + 1).toLowerCase();
                         // System.err.println(word);
                         container.addWord(word);
                     }
-                    lastInd = i;
                 }
+            } catch (IOException ex) {
+                ex.printStackTrace(System.err);
+                return;
+            } finally {
+                reader.close();
             }
-            if (line.length() - lastInd > 1) {
-                String word = line.substring(lastInd + 1).toLowerCase();
-                // System.err.println(word);
-                container.addWord(word);
-            }
+        } catch (IOException ex) {
+            ex.printStackTrace(System.err);
+            return;
         }
-        scanner.close();
+
         try (FileWriter fileWriter = new FileWriter(args[1])) {
             for (int i = 0; i < container.size(); i++) {
                 fileWriter.write(container.getWordAt(i));
