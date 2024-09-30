@@ -4,54 +4,28 @@ import java.util.*;
 
 public class WordStatInput {
     public static class MyContainer {
-        public static class ContainerElement {
-            private int count;
-            private final String word;
-
-            public ContainerElement(String word) {
-                this.word = word;
-                count = 1;
-            }
-
-            public String getWord() {
-                return word;
-            }
-
-            public int getCount() {
-                return count;
-            }
-
-            public void addCount() {
-                count++;
-            }
-        }
-
-        private final List<ContainerElement> elements;
+        private final Map<String, Integer> elements;
+        private final List<String> words;
 
         public MyContainer() {
-            elements = new ArrayList<>();
+            elements = new HashMap<>();
+            words = new ArrayList<>();
         }
 
         public void addWord(String word) {
-            for (ContainerElement element : elements) {
-                if (Objects.equals(element.getWord(), word)) {
-                    element.addCount();
-                    return;
-                }
+            if (!elements.containsKey(word)) {
+                elements.put(word, 0);
+                words.add(word);
             }
-            elements.add(new ContainerElement(word));
+            elements.replace(word, elements.get(word) + 1);
         }
 
-        public int size() {
-            return elements.size();
+        public List<String> getWords() {
+            return words;
         }
 
-        public String getWordAt(int index) {
-            return elements.get(index).getWord();
-        }
-
-        public int getCountAt(int index) {
-            return elements.get(index).getCount();
+        public int getCount(String word) {
+            return elements.get(word);
         }
     }
 
@@ -99,10 +73,10 @@ public class WordStatInput {
         }
 
         try (FileWriter fileWriter = new FileWriter(args[1])) {
-            for (int i = 0; i < container.size(); i++) {
-                fileWriter.write(container.getWordAt(i));
+            for (String word : container.getWords()) {
+                fileWriter.write(word);
                 fileWriter.write(' ');
-                fileWriter.write(String.valueOf(container.getCountAt(i)));
+                fileWriter.write(String.valueOf(container.getCount(word)));
                 fileWriter.write('\n');
             }
         } catch (IOException ex) {
