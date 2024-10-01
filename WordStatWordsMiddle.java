@@ -1,20 +1,30 @@
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class WordStatWordsMiddle {
-    public static String getMiddleWord(String line, int indStartWord, int indEndWord) {
-        if (indEndWord - indStartWord > 6) {
-            indStartWord += 3;
-            indEndWord -= 3;
+    public static String getMiddleWord(String word) {
+        word = word.toLowerCase();
+        if (word.length() > 6) {
+            return word.substring(3, word.length() - 3);
         }
-        return line.substring(indStartWord, indEndWord).toLowerCase();
+        return word;
     }
 
     public static void main(String[] args) {
-        List<String> allWords = new ArrayList<>();
+        final int BUFFER_SIZE = 1024;
+
+        Map<String, Integer> wordsCount = new TreeMap<>();
+
+        Consumer<String> addToMap = (String word) -> {
+            word = getMiddleWord(word);
+            Integer countWord = wordsCount.get(word);
+            if (countWord == null) {
+                countWord = 0;
+            }
+            wordsCount.put(word, countWord + 1);
+        };
 
         BufferedReader reader;
         try {
@@ -23,26 +33,35 @@ public class WordStatWordsMiddle {
                             new FileInputStream(args[0]),
                             StandardCharsets.UTF_8
                     ),
-                    1024
+                    BUFFER_SIZE
             );
             try {
-                String line;
-                while ((line = reader.readLine()) != null) {
+                char[] buffer = new char[BUFFER_SIZE];
+                StringBuilder prevPartWord = new StringBuilder();
+                int lenBuffer;
+                while ((lenBuffer = reader.read(buffer)) > -1) {
                     int lastInd = -1;
-                    for (int i = 0; i < line.length(); i++) {
-                        char ch = line.charAt(i);
+                    for (int i = 0; i < lenBuffer; i++) {
+                        char ch = buffer[i];
                         int chType = Character.getType(ch);
-                        if (!Character.isLetter(ch) && Character.DASH_PUNCTUATION != chType &&
-                                ch != '\'') {
-                            if (i - lastInd > 1) {
-                                allWords.add(getMiddleWord(line, lastInd + 1, i));
+                        if (!Character.isLetter(ch) && Character.DASH_PUNCTUATION != chType && ch != '\'') {
+                            if (i - lastInd + prevPartWord.length() > 1) {
+                                String word = new String(Arrays.copyOfRange(buffer, lastInd + 1, i));
+                                if (!prevPartWord.isEmpty()) {
+                                    word = prevPartWord + word;
+                                    prevPartWord = new StringBuilder();
+                                }
+                                addToMap.accept(word);
                             }
                             lastInd = i;
                         }
                     }
-                    if (line.length() - lastInd > 1) {
-                        allWords.add(getMiddleWord(line, lastInd + 1, line.length()));
+                    if (lenBuffer - lastInd > 1) {
+                        prevPartWord.append(new String(Arrays.copyOfRange(buffer, lastInd + 1, lenBuffer)));
                     }
+                }
+                if (!prevPartWord.isEmpty()) {
+                    addToMap.accept(prevPartWord.toString());
                 }
             } catch (IOException ex) {
                 System.err.println("Error in reading input file");
@@ -57,28 +76,19 @@ public class WordStatWordsMiddle {
             return;
         }
 
-        String[] allWordsArr = new String[allWords.size()];
-        allWordsArr = allWords.toArray(allWordsArr);
+        String[] sortedWords = new String[wordsCount.size()];
+        sortedWords = wordsCount.keySet().toArray(sortedWords);
 
-        Arrays.sort(allWordsArr);
-
-        try (FileWriter fileWriter = new FileWriter(args[1])) {
-            String lastWord = null;
-            int count = 0;
-            for (int i = allWordsArr.length - 1; i >= 0; i--) {
-                String word = allWordsArr[i];
-                if (word.equals(lastWord)) {
-                    count++;
-                } else {
-                    if (count > 0) {
-                        fileWriter.write(String.format("%s %d\n", lastWord, count));
-                    }
-                    count = 1;
-                    lastWord = word;
-                }
-            }
-            if (count > 0) {
-                fileWriter.write(String.format("%s %d\n", lastWord, count));
+        try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(
+                        new FileOutputStream(args[1]),
+                        StandardCharsets.UTF_8
+                ),
+                BUFFER_SIZE
+        )) {
+            for (int i = sortedWords.length - 1; i >= 0; i--) {
+                String word = sortedWords[i];
+                writer.write(String.format("%s %d\n", word, wordsCount.get(word)));
             }
         } catch (IOException ex) {
             System.err.println("Error in open or writing in output file");
