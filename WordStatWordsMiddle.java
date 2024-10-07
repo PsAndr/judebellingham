@@ -1,7 +1,6 @@
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Consumer;
 
 public class WordStatWordsMiddle {
     public static String getMiddleWord(String word) {
@@ -12,19 +11,16 @@ public class WordStatWordsMiddle {
         return word;
     }
 
+    public static void addWordToMap(Map<String, Integer> map, String word) {
+        word = getMiddleWord(word);
+        map.putIfAbsent(word, 0);
+        map.merge(word, 1, Integer::sum);
+    }
+
     public static void main(String[] args) {
         final int BUFFER_SIZE = 1024;
 
         Map<String, Integer> wordsCount = new TreeMap<>();
-
-        Consumer<String> addToMap = (String word) -> {
-            word = getMiddleWord(word);
-            Integer countWord = wordsCount.get(word);
-            if (countWord == null) {
-                countWord = 0;
-            }
-            wordsCount.put(word, countWord + 1);
-        };
 
         BufferedReader reader;
         try {
@@ -51,7 +47,7 @@ public class WordStatWordsMiddle {
                                     word = prevPartWord + word;
                                     prevPartWord = new StringBuilder();
                                 }
-                                addToMap.accept(word);
+                                addWordToMap(wordsCount, word);
                             }
                             lastInd = i;
                         }
@@ -61,7 +57,7 @@ public class WordStatWordsMiddle {
                     }
                 }
                 if (!prevPartWord.isEmpty()) {
-                    addToMap.accept(prevPartWord.toString());
+                    addWordToMap(wordsCount, prevPartWord.toString());
                 }
             } catch (IOException ex) {
                 System.err.println("Error in reading input file");
