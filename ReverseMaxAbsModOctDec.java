@@ -1,8 +1,18 @@
 import java.util.ArrayList;
 import java.util.List;
 import static java.lang.Math.abs;
+import static java.lang.Math.max;
 
 public class ReverseMaxAbsModOctDec {
+    public static void addBufferToMatrix(List<Integer> buffer, List<int[]> matrix) {
+        int[] array = new int[buffer.size()];
+        for (int j = 0; j < array.length; j++) {
+            array[j] = buffer.get(j);
+        }
+        matrix.add(array);
+        buffer.clear();
+    }
+
     public static void main(String[] args) {
         final int MOD = 1_000_000_007;
 
@@ -14,13 +24,7 @@ public class ReverseMaxAbsModOctDec {
             while (scanner.hasNext()) {
                 MyScanner.ValueTwoCount<Integer> intAndLinesCount = scanner.nextIntOrOctIntAndSkipLinesCount();
                 if (intAndLinesCount.firstCount > 0) {
-                    int[] array = new int[buffer.size()];
-                    for (int j = 0; j < array.length; j++) {
-                        array[j] = buffer.get(j);
-                    }
-                    matrix.add(array);
-                    maxLengthLine = Math.max(maxLengthLine, array.length);
-                    buffer.clear();
+                    addBufferToMatrix(buffer, matrix);
                 }
                 for (int i = 0; i < intAndLinesCount.firstCount - 1; i++) {
                     matrix.add(new int[0]);
@@ -29,19 +33,16 @@ public class ReverseMaxAbsModOctDec {
                     buffer.add(intAndLinesCount.element);
                 }
                 if (intAndLinesCount.secondCount > 0) {
-                    int[] array = new int[buffer.size()];
-                    for (int j = 0; j < array.length; j++) {
-                        array[j] = buffer.get(j);
-                    }
-                    matrix.add(array);
-                    maxLengthLine = Math.max(maxLengthLine, array.length);
-                    buffer.clear();
+                    addBufferToMatrix(buffer, matrix);
                 }
             }
         } catch (MyScanner.CanNotReadSourceStream ex) {
             System.err.println("Error while reading file: " + ex.getMessage());
         }
 
+        for (int[] line : matrix) {
+            maxLengthLine = max(maxLengthLine, line.length);
+        }
         int[] maxLines = new int[matrix.size()];
         int[] maxColumns = new int[maxLengthLine];
 
