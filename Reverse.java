@@ -1,51 +1,46 @@
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.List;
 
 public class Reverse {
-    public static void main(String[] args) {
-        FileReader file;
-        try {
-            file = new FileReader("txt.txt");
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+    public static void addBufferToMatrix(List<Integer> buffer, List<int[]> matrix) {
+        int[] array = new int[buffer.size()];
+        for (int j = 0; j < array.length; j++) {
+            array[j] = buffer.get(j);
         }
-        Scanner scanner = new Scanner(System.in);
-        // Scanner scanner = new Scanner(file);
-        ArrayList<Integer> array = new ArrayList<>();
-        array.add(null);
+        matrix.add(array);
+        buffer.clear();
+    }
 
-        String line;
-        while (scanner.hasNextLine()) {
-            line = scanner.nextLine();
-            int lastIndex = -1;
-            for (int i = 0; i < line.length(); i++) {
-                char ch = line.charAt(i);
+    public static void main(String[] args) {
+        List<int[]> matrix = new ArrayList<>();
+        List<Integer> buffer = new ArrayList<>();
 
-                if (!Character.isDigit(ch) && ch != '-') {
-                    if (i - lastIndex > 1) {
-                        array.add(Integer.parseInt(line.substring(lastIndex + 1, i)));
-                    }
-                    lastIndex = i;
+        try (MyScanner scanner = new MyScanner(System.in)) {
+            while (scanner.hasNext()) {
+                MyScanner.ValueTwoCount<Integer> intAndLinesCount = scanner.nextIntAndSkipLinesCount();
+                if (intAndLinesCount.firstCount > 0) {
+                    addBufferToMatrix(buffer, matrix);
+                }
+                for (int i = 0; i < intAndLinesCount.firstCount - 1; i++) {
+                    matrix.add(new int[0]);
+                }
+                if (intAndLinesCount.element != null) {
+                    buffer.add(intAndLinesCount.element);
+                }
+                if (intAndLinesCount.secondCount > 0) {
+                    addBufferToMatrix(buffer, matrix);
                 }
             }
-            if (line.length() - lastIndex > 1) {
-                array.add(Integer.parseInt(line.substring(lastIndex + 1)));
-            }
-            array.add(null);
+        } catch (MyScanner.CanNotReadSourceStream ex) {
+            System.err.println("Error while reading file: " + ex.getMessage());
         }
 
-        for (Integer el : array.reversed().subList(1, array.size())) {
-            if (el != null) {
-                System.out.print(el);
+        for (int[] lineArr : matrix.reversed()) {
+            for (int i = lineArr.length - 1; i >= 0; i--) {
+                System.out.print(lineArr[i]);
                 System.out.print(' ');
-            } else {
-                System.out.print('\n');
             }
+            System.out.print(System.lineSeparator());
         }
-        System.err.println(array.size());
-        System.err.println(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
-        System.err.println(1_000_000 * 4 * 8);
     }
 }
