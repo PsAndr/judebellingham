@@ -7,23 +7,6 @@ import java.util.function.Function;
 public class MyScanner implements Closeable {
     public static class CanNotReadSourceStream extends IOException { }
 
-    public static class ValueTwoCount<T> {
-        public final T element;
-        public final int firstCount;
-        public final int secondCount;
-
-        public ValueTwoCount(T element, int firstCount, int secondCount) {
-            this.element = element;
-            this.firstCount = firstCount;
-            this.secondCount = secondCount;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("(%s, %d, %d)", element, firstCount, secondCount);
-        }
-    }
-
     private static final int BUFFER_SIZE = 1024 * 1024 / 2;
 
     private final char[] buffer;
@@ -80,10 +63,6 @@ public class MyScanner implements Closeable {
         return bufferSize > 0;
     }
 
-    private boolean isLineSeparator(char ch) {
-        return System.lineSeparator().indexOf(ch) != -1;
-    }
-
     private boolean isPartOfWord(char ch) {
         return Character.isLetter(ch) || Character.DASH_PUNCTUATION == Character.getType(ch) || ch == '\'';
     }
@@ -96,81 +75,90 @@ public class MyScanner implements Closeable {
         return isPartOfNumber(ch) || Character.toLowerCase(ch) == 'o';
     }
 
-    public String nextCharSequenceByFunc(Function<Character, Boolean> func) throws CanNotReadSourceStream {
-        return nextCharSequenceAndLinesSkipCountByFunc(func).element;
-    }
-
-    public ValueTwoCount<String> nextCharSequenceAndLinesSkipCountByFunc(
-            Function<Character, Boolean> func) throws CanNotReadSourceStream {
+    public String nextCharSequenceInLineByFunc(Function<Character, Boolean> func) throws CanNotReadSourceStream {
         StringBuilder line = new StringBuilder();
-        int lineCountPrev = 0;
-        int lineCountAfter = 0;
-
-        char ch = 'q';
+        char ch;
         while (hasNext()) {
-            ch = nextChar();
-            if (isLineSeparator(ch)) {
-                for (int i = 0; i < System.lineSeparator().length() - 1 && hasNext(); i++) {
+            ch = getChar();
+            if (ch == System.lineSeparator().charAt(0)) {
+                boolean flag = true;
+                for (int i = 0; i < System.lineSeparator().length() && hasNext(); i++) {
+                    ch = getChar();
+                    if (ch != System.lineSeparator().charAt(i)) {
+                        flag = false;
+                        break;
+                    }
                     nextChar();
                 }
-                lineCountPrev++;
+                if (flag) {
+                    return null;
+                }
             }
             if (func.apply(ch)) {
-                line.append(ch);
                 break;
             }
+            nextChar();
         }
-        boolean flag = false;
         while (hasNext()) {
-            ch = nextChar();
-            flag = true;
+            ch = getChar();
             if (!func.apply(ch)) {
                 break;
             }
             line.append(ch);
-        }
-        if (flag && isLineSeparator(ch)) {
-            for (int i = 0; i < System.lineSeparator().length() - 1 && hasNext(); i++) {
-                nextChar();
-            }
-            lineCountAfter++;
+            nextChar();
         }
 
-        return new ValueTwoCount<>(line.toString(), lineCountPrev, lineCountAfter);
+        if (line.isEmpty()) {
+            return null;
+        }
+
+        return line.toString();
     }
 
     public String nextWord() throws CanNotReadSourceStream {
-        return nextCharSequenceByFunc(this::isPartOfWord);
+        return nextCharSequenceInLineByFunc(this::isPartOfWord);
     }
 
-    public ValueTwoCount<Integer> nextIntAndSkipLinesCount() throws CanNotReadSourceStream {
-        ValueTwoCount<String> pair = nextCharSequenceAndLinesSkipCountByFunc(this::isPartOfNumber);
-        Integer intPart;
-        if (pair.element.isBlank()) {
-            intPart = null;
-        } else {
-            intPart = Integer.parseInt(pair.element);
-        }
-        return new ValueTwoCount<>(intPart, pair.firstCount, pair.secondCount);
+    public String nextWordAndSkipLinesCount() throws CanNotReadSourceStream {
+        return nextCharSequenceInLineByFunc(this::isPartOfWord);
     }
 
-    public ValueTwoCount<Integer> nextIntOrOctIntAndSkipLinesCount() throws CanNotReadSourceStream {
-        ValueTwoCount<String> pair = nextCharSequenceAndLinesSkipCountByFunc(this::isPartOfNumberOct);
-        String charSequence = pair.element;
-        charSequence = charSequence.toLowerCase();
+    public String nextWordWithOtherSymbolsInLine(
+            Function<Character, Boolean> otherSymbolsCheck)
+            throws CanNotReadSourceStream {
+        return nextCharSequenceInLineByFunc((Character ch) ->
+                isPartOfWord(ch) || otherSymbolsCheck.apply(ch));
+    }
 
-        Integer intPart;
-        if (charSequence.isBlank()) {
-            intPart = null;
-        } else {
-            if (charSequence.endsWith("o")) {
-                intPart = Integer.parseUnsignedInt(charSequence.substring(0, charSequence.length() - 1), 8);
-            } else {
-                intPart = Integer.parseInt(charSequence);
-            }
+    public Integer nextIntInLine() throws CanNotReadSourceStream {
+        String s = nextCharSequenceInLineByFunc(this::isPartOfNumber);
+        if (s == null) {
+            return null;
+        }
+        return Integer.parseInt(s);
+    }
+
+    // remove count
+    public Integer nextIntOrOctIntInLine() throws CanNotReadSourceStream {
+        String s = nextCharSequenceInLineByFunc(this::isPartOfNumberOct);
+        if (s == null) {
+            return null;
         }
 
-        return new ValueTwoCount<>(intPart, pair.firstCount, pair.secondCount);
+        s = s.toLowerCase();
+        int intPart;
+        if (s.endsWith("o")) {
+            intPart = Integer.parseUnsignedInt(s.substring(0, s.length() - 1), 8);
+        } else {
+            intPart = Integer.parseInt(s);
+        }
+
+        return intPart;
+    }
+
+    public char getChar() {
+        check();
+        return buffer[bufferPointer];
     }
 
     public char nextChar() throws CanNotReadSourceStream {
@@ -180,22 +168,6 @@ public class MyScanner implements Closeable {
             updateBuffer();
         }
         return result;
-    }
-
-    public String nextLine() throws CanNotReadSourceStream {
-        StringBuilder line = new StringBuilder();
-
-        char ch;
-        do {
-            ch = nextChar();
-            line.append(ch);
-        } while (!isLineSeparator(ch) && hasNext());
-
-        for (int i = 0; hasNext() && i < System.lineSeparator().length() - 1; i++) {
-            line.append(nextChar());
-        }
-
-        return line.toString();
     }
 
     @Override
