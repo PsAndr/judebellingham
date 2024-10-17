@@ -22,19 +22,12 @@ public class ReverseMaxAbsModOctDec {
 
         try (MyScanner scanner = new MyScanner(System.in)) {
             while (scanner.hasNext()) {
-                MyScanner.ValueTwoCount<Integer> intAndLinesCount = scanner.nextIntOrOctIntAndSkipLinesCount();
-                if (intAndLinesCount.firstCount > 0) {
+                Integer val = scanner.nextIntOrOctIntInLine();
+                if (val == null) {
                     addBufferToMatrix(buffer, matrix);
+                    continue;
                 }
-                for (int i = 0; i < intAndLinesCount.firstCount - 1; i++) {
-                    matrix.add(new int[0]);
-                }
-                if (intAndLinesCount.element != null) {
-                    buffer.add(intAndLinesCount.element);
-                }
-                if (intAndLinesCount.secondCount > 0) {
-                    addBufferToMatrix(buffer, matrix);
-                }
+                buffer.add(val);
             }
         } catch (MyScanner.CanNotReadSourceStream ex) {
             System.err.println("Error while reading file: " + ex.getMessage());
