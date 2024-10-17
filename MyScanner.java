@@ -2,7 +2,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
-import java.util.function.Function;
+import java.util.function.IntPredicate;
 
 public class MyScanner implements Closeable {
     public static class CanNotReadSourceStream extends IOException { }
@@ -63,19 +63,19 @@ public class MyScanner implements Closeable {
         return bufferSize > 0;
     }
 
-    private boolean isPartOfWord(char ch) {
+    private boolean isPartOfWord(int ch) {
         return Character.isLetter(ch) || Character.DASH_PUNCTUATION == Character.getType(ch) || ch == '\'';
     }
 
-    private boolean isPartOfNumber(char ch) {
+    private boolean isPartOfNumber(int ch) {
         return Character.isDigit(ch) || ch == '+' || ch == '-' || ch == '.';
     }
 
-    private boolean isPartOfNumberOct(char ch) {
+    private boolean isPartOfNumberOct(int ch) {
         return isPartOfNumber(ch) || Character.toLowerCase(ch) == 'o';
     }
 
-    public String nextCharSequenceInLineByFunc(Function<Character, Boolean> func) throws CanNotReadSourceStream {
+    public String nextCharSequenceInLineByFunc(IntPredicate func) throws CanNotReadSourceStream {
         StringBuilder line = new StringBuilder();
         char ch;
         while (hasNext()) {
@@ -94,14 +94,14 @@ public class MyScanner implements Closeable {
                     return null;
                 }
             }
-            if (func.apply(ch)) {
+            if (func.test(ch)) {
                 break;
             }
             nextChar();
         }
         while (hasNext()) {
             ch = getChar();
-            if (!func.apply(ch)) {
+            if (!func.test(ch)) {
                 break;
             }
             line.append(ch);
@@ -123,11 +123,10 @@ public class MyScanner implements Closeable {
         return nextCharSequenceInLineByFunc(this::isPartOfWord);
     }
 
-    public String nextWordWithOtherSymbolsInLine(
-            Function<Character, Boolean> otherSymbolsCheck)
+    public String nextWordWithOtherSymbolsInLine(IntPredicate otherSymbolsCheck)
             throws CanNotReadSourceStream {
-        return nextCharSequenceInLineByFunc((Character ch) ->
-                isPartOfWord(ch) || otherSymbolsCheck.apply(ch));
+        return nextCharSequenceInLineByFunc((int ch) ->
+                isPartOfWord(ch) || otherSymbolsCheck.test(ch));
     }
 
     public Integer nextIntInLine() throws CanNotReadSourceStream {
