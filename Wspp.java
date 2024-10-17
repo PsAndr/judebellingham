@@ -14,7 +14,7 @@ public class Wspp {
         try (MyScanner scanner = new MyScanner(new FileInputStream(args[0]))) {
             while (scanner.hasNext()) {
                 String word = scanner.nextWord();
-                if (word.isBlank()) {
+                if (word == null) {
                     continue;
                 }
                 word = word.toLowerCase();
