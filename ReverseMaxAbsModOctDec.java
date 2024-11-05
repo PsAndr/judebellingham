@@ -1,3 +1,5 @@
+import scanner.MyScanner;
+
 import java.util.ArrayList;
 import java.util.List;
 import static java.lang.Math.abs;
@@ -5,12 +7,7 @@ import static java.lang.Math.max;
 
 public class ReverseMaxAbsModOctDec {
     public static void addBufferToMatrix(List<Integer> buffer, List<int[]> matrix) {
-        int[] array = new int[buffer.size()];
-        for (int j = 0; j < array.length; j++) {
-            array[j] = buffer.get(j);
-        }
-        matrix.add(array);
-        buffer.clear();
+        Reverse.addBufferToMatrix(buffer, matrix);
     }
 
     public static void main(String[] args) {

@@ -1,3 +1,5 @@
+package scanner;
+
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -55,7 +57,7 @@ public class MyScanner implements Closeable {
 
     private void checkClosed() {
         if (closed) {
-            throw new IllegalStateException("MyScanner is already closed");
+            throw new IllegalStateException("scanner.MyScanner is already closed");
         }
     }
 
@@ -119,10 +121,6 @@ public class MyScanner implements Closeable {
         return nextCharSequenceInLineByFunc(this::isPartOfWord);
     }
 
-    public String nextWordAndSkipLinesCount() throws CanNotReadSourceStream {
-        return nextCharSequenceInLineByFunc(this::isPartOfWord);
-    }
-
     public String nextWordWithOtherSymbolsInLine(IntPredicate otherSymbolsCheck)
             throws CanNotReadSourceStream {
         return nextCharSequenceInLineByFunc((int ch) ->
@@ -137,7 +135,6 @@ public class MyScanner implements Closeable {
         return Integer.parseInt(s);
     }
 
-    // remove count
     public Integer nextIntOrOctIntInLine() throws CanNotReadSourceStream {
         String s = nextCharSequenceInLineByFunc(this::isPartOfNumberOct);
         if (s == null) {
@@ -153,6 +150,34 @@ public class MyScanner implements Closeable {
         }
 
         return intPart;
+    }
+
+    public String nextLine() throws CanNotReadSourceStream {
+        StringBuilder line = new StringBuilder();
+        char ch;
+        while (hasNext()) {
+            ch = getChar();
+            if (ch == System.lineSeparator().charAt(0)) {
+                boolean flag = true;
+                for (int i = 0; i < System.lineSeparator().length(); i++) {
+                    ch = getChar();
+                    line.append(ch);
+                    if (hasNext()) {
+                        nextChar();
+                    }
+                    if (ch != System.lineSeparator().charAt(i)) {
+                        flag = false;
+                        break;
+                    }
+                }
+                if (flag) {
+                    break;
+                }
+            }
+            line.append(ch);
+            nextChar();
+        }
+        return line.toString();
     }
 
     public char getChar() {
