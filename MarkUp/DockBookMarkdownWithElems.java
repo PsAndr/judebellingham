@@ -8,20 +8,23 @@ public abstract class DockBookMarkdownWithElems<T extends MarkdownAble & DocBook
         super(elements);
     }
 
-    protected String getMarkdownSigns() {
+    protected String getMarkdownSignsOpen() {
         return "";
+    }
+
+    protected String getMarkdownSignsClose() {
+        return getMarkdownSignsOpen();
     }
 
     protected abstract String getHtmlTag();
 
     @Override
     public void toMarkdown(final StringBuilder sb) {
-        final String sign = getMarkdownSigns();
-        sb.append(sign);
+        sb.append(getMarkdownSignsOpen());
         for (final T element: elements) {
             element.toMarkdown(sb);
         }
-        sb.append(sign);
+        sb.append(getMarkdownSignsClose());
     }
 
     @Override

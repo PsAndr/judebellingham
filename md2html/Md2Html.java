@@ -6,13 +6,66 @@ import markup.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 public class Md2Html {
     public enum TypeTextGroup {
         None,
         Paragraph,
         Header,
+    }
+
+    enum SplitSign {
+        DoubleStar,
+        Star,
+        DoubleUnder,
+        Under,
+        DoubleHyphen,
+        Apostrophe,
+        LeftArrows,
+        RightArrows,
+        CloseBraces,
+        OpenBraces,
+    }
+
+    record SplitSignsElem(int ind, SplitSign splitSign) {
+    }
+
+    private static int getSizeSplitSign(SplitSign splitSign) {
+        return splitSignsValues.get(splitSign).length();
+    }
+
+    private static boolean isOpenSign(SplitSign splitSign) {
+        return switch (splitSign) {
+            case RightArrows, OpenBraces -> false;
+            default -> true;
+        };
+    }
+
+    private static boolean isPairSigns(SplitSign open, SplitSign close) {
+        return switch (open) {
+            case LeftArrows -> close == SplitSign.RightArrows;
+            case CloseBraces -> close == SplitSign.OpenBraces;
+            default -> open == close;
+        };
+    }
+
+    private static final EnumMap<SplitSign, String> splitSignsValues = new EnumMap<>(SplitSign.class);
+    static {
+        splitSignsValues.putAll(Map.of(
+                SplitSign.Star, "*",
+                SplitSign.DoubleStar, "**",
+                SplitSign.Under, "_",
+                SplitSign.DoubleUnder, "__",
+                SplitSign.DoubleHyphen, "--",
+                SplitSign.Apostrophe, "`",
+                SplitSign.LeftArrows, "<<",
+                SplitSign.RightArrows, ">>",
+                SplitSign.CloseBraces, "}}",
+                SplitSign.OpenBraces, "{{"
+        ));
     }
 
     public static void main(String[] args) {
@@ -66,7 +119,6 @@ public class Md2Html {
                         sb.append(line);
                         break;
                 }
-                // System.err.printf("%s ||| %s%n", line, group);
             }
         } catch (MyScanner.CanNotReadSourceStream ex) {
             System.err.println("Error while reading file: " + ex.getMessage());
@@ -76,15 +128,12 @@ public class Md2Html {
 
         dropNewElement(ans, sb, levelHeader, group);
 
-        // System.err.printf("LOL: %d%n", ans.size());
-
         try (BufferedWriter bw = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(outputFile),
                         StandardCharsets.UTF_8), 1024)) {
             for (HtmlAble s : ans) {
                 sb.setLength(0);
                 s.toHtml(sb);
-                // System.err.println(sb);
                 bw.write(sb.toString());
                 bw.write(System.lineSeparator());
             }
@@ -93,66 +142,45 @@ public class Md2Html {
         }
     }
 
-    enum SplitSign {
-        Star,
-        DoubleStar,
-        Under,
-        DoubleUnder,
-        DoubleHyphen,
-        Apostrophe,
-    }
-
-    record SplitSignsElem(int ind, SplitSign splitSign) {
-    }
 
     private static void dropNewElement(List<HtmlAble> ans, StringBuilder sb, int levelHeader, TypeTextGroup group) {
         if (group != TypeTextGroup.None) {
             List<SplitSignsElem> splitSigns = new ArrayList<>();
 
             String paragraphText = sb.toString();
-            // System.err.printf("Paragraph: %s%n", paragraphText);
 
             boolean isIgnore = false;
             for (int i = 0; i < paragraphText.length(); i++) {
                 char ch = paragraphText.charAt(i);
                 if (!isIgnore) {
-                    switch (ch) {
-                        case '\\':
-                            isIgnore = true;
-                            continue;
-                        case '*':
-                            if (i + 1 < paragraphText.length() && paragraphText.charAt(i + 1) == '*') {
-                                splitSigns.add(new SplitSignsElem(i + 1, SplitSign.DoubleStar));
-                                i++;
-                            } else {
-                                splitSigns.add(new SplitSignsElem(i, SplitSign.Star));
+                    if (ch == '\\') {
+                        isIgnore = true;
+                        continue;
+                    } else {
+                        for (SplitSign splitSign : SplitSign.values()) {
+                            String signs = splitSignsValues.get(splitSign);
+                            boolean flag = paragraphText.length() - i >= signs.length();
+                            if (flag) {
+                                for (int j = 0; j < signs.length(); j++) {
+                                    if (paragraphText.charAt(i + j) != signs.charAt(j)) {
+                                        flag = false;
+                                        break;
+                                    }
+                                }
                             }
-                            break;
-                        case '_':
-                            if (i + 1 < paragraphText.length() && paragraphText.charAt(i + 1) == '_') {
-                                splitSigns.add(new SplitSignsElem(i + 1, SplitSign.DoubleUnder));
-                                i++;
-                            } else {
-                                splitSigns.add(new SplitSignsElem(i, SplitSign.Under));
+                            if (flag) {
+                                splitSigns.add(new SplitSignsElem(i + signs.length() - 1, splitSign));
+                                i += signs.length() - 1;
+                                break;
                             }
-                            break;
-                        case '-':
-                            if (i + 1 < paragraphText.length() && paragraphText.charAt(i + 1) == '-') {
-                                splitSigns.add(new SplitSignsElem(i + 1, SplitSign.DoubleHyphen));
-                                i++;
-                            }
-                            break;
-                        case '`':
-                            splitSigns.add(new SplitSignsElem(i, SplitSign.Apostrophe));
-                            break;
-                        default:
-                            break;
+                        }
                     }
                 }
                 isIgnore = false;
             }
             List<TextElement> paragraphElems = parseSplitSignsList(0, splitSigns.size(),
                     0, paragraphText.length(), splitSigns, paragraphText);
+            // System.err.printf("%s%n", paragraphText);
             switch (group) {
                 case Paragraph:
                     ans.add(new Paragraph(paragraphElems));
@@ -164,17 +192,11 @@ public class Md2Html {
         sb.setLength(0);
     }
 
-    private static int getSizeSplitSign(SplitSign splitSign) {
-        return switch (splitSign) {
-            case Star, Under, Apostrophe -> 1;
-            case DoubleStar, DoubleHyphen, DoubleUnder -> 2;
-        };
-    }
-
     private static List<TextElement> parseSplitSignsList(int l, int r, int ls, int rs,
                                                          List<SplitSignsElem> splitSigns,
                                                          String textParagraph) {
         if (l >= r) {
+            // System.err.printf("All text parse: %s%n", textParagraph.substring(ls, rs));
             return List.of(new Text(textParagraph.substring(ls, rs)));
         }
         List<TextElement> paragraphElems = new ArrayList<>();
@@ -189,28 +211,34 @@ public class Md2Html {
             int ind = splitSigns.get(i).ind;
             ind -= getSizeSplitSign(splitSigns.get(i).splitSign) - 1;
             if (ind - prevInd > 0) {
+                // System.err.printf("Before element parse: %s%n", textParagraph.substring(prevInd, ind));
                 paragraphElems.add(new Text(textParagraph.substring(prevInd, ind)));
             }
-            for (int j = i + 1; j < r; j++) {
-                if (splitSigns.get(i).splitSign == splitSigns.get(j).splitSign) {
-                    int szSignEnd = getSizeSplitSign(splitSigns.get(j).splitSign);
-                    List<TextElement> innerElements = parseSplitSignsList(i + 1, j,
-                            splitSigns.get(i).ind + 1, splitSigns.get(j).ind - szSignEnd + 1,
-                            splitSigns, textParagraph);
+            if (isOpenSign(splitSigns.get(i).splitSign)) {
+                for (int j = i + 1; j < r; j++) {
+                    if (isPairSigns(splitSigns.get(i).splitSign, splitSigns.get(j).splitSign)) {
+                        int szSignEnd = getSizeSplitSign(splitSigns.get(j).splitSign);
+                        List<TextElement> innerElements = parseSplitSignsList(i + 1, j,
+                                splitSigns.get(i).ind + 1, splitSigns.get(j).ind - szSignEnd + 1,
+                                splitSigns, textParagraph);
 
-                    paragraphElems.add(switch (splitSigns.get(i).splitSign) {
-                        case Apostrophe -> new Code(innerElements);
-                        case Star, Under -> new Emphasis(innerElements);
-                        case DoubleStar, DoubleUnder -> new Strong(innerElements);
-                        case DoubleHyphen -> new Strikeout(innerElements);
-                    });
-                    i = j;
-                    flag = true;
-                    break;
+                        paragraphElems.add(switch (splitSigns.get(i).splitSign) {
+                            case Apostrophe -> new Code(innerElements);
+                            case Star, Under -> new Emphasis(innerElements);
+                            case DoubleStar, DoubleUnder -> new Strong(innerElements);
+                            case DoubleHyphen -> new Strikeout(innerElements);
+                            case LeftArrows -> new Insert(innerElements);
+                            case CloseBraces -> new Delete(innerElements);
+                            default -> new Text("");
+                        });
+                        i = j;
+                        flag = true;
+                        break;
+                    }
                 }
             }
             if (!flag) {
-                paragraphElems.add(new Text(String.valueOf(textParagraph.charAt(splitSigns.get(i).ind))));
+                paragraphElems.add(new Text(splitSignsValues.get(splitSigns.get(i).splitSign)));
             }
         }
         int ind = ls;
@@ -219,6 +247,7 @@ public class Md2Html {
         }
         if (rs - ind > 0) {
             paragraphElems.add(new Text(textParagraph.substring(ind, rs)));
+            // System.err.printf("End parse: %s%n", textParagraph.substring(ind, rs));
         }
         // System.err.printf("Ind + Next Ind: %d %d %n", ind, rs);
         return paragraphElems;

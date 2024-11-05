@@ -14,7 +14,7 @@ public class Strikeout extends MarkupElement {
     }
 
     @Override
-    protected String getMarkdownSigns() {
+    protected String getMarkdownSignsOpen() {
         return "~";
     }
 

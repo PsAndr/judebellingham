@@ -2,23 +2,28 @@ package markup;
 
 import java.util.List;
 
-public class Code extends MarkupElement {
-    public Code(final List<TextElement> elements) {
+public class Delete extends MarkupElement {
+    public Delete(final List<TextElement> elements) {
         super(elements);
     }
 
     @Override
     protected String getDocBookTag() {
-        return "code";
+        return "del";
     }
 
     @Override
     protected String getHtmlTag() {
-        return "code";
+        return "del";
     }
 
     @Override
     protected String getMarkdownSignsOpen() {
-        return "`";
+        return "}}";
+    }
+
+    @Override
+    protected String getMarkdownSignsClose() {
+        return "{{";
     }
 }
