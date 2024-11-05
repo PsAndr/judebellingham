@@ -2,17 +2,18 @@ package markup;
 
 import java.util.List;
 
-public class Paragraph implements MarkDownAble {
-    private final List<MarkDownAble> elements;
-
-    public Paragraph(List<MarkDownAble> elements) {
-        this.elements = elements;
+public class Paragraph extends DockBookMarkdownWithElems<TextElement> implements GroupElement, MarkdownAble {
+    public Paragraph(final List<TextElement> elements) {
+        super(elements);
     }
 
     @Override
-    public void toMarkdown(StringBuilder sb) {
-        for (MarkDownAble elem : elements) {
-            elem.toMarkdown(sb);
-        }
+    protected String getDocBookTag() {
+        return "para";
+    }
+
+    @Override
+    protected String getHtmlTag() {
+        return "p";
     }
 }

@@ -1,5 +1,5 @@
 package markup;
 
-public interface MarkDownAble {
-    void toMarkdown(StringBuilder sb);
+public interface MarkdownAble extends HtmlAble {
+    void toMarkdown(final StringBuilder sb);
 }

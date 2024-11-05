@@ -1,14 +1,7 @@
 package markup;
 
-public class Text implements MarkDownAble {
-    private final String text;
-
-    public Text(String text) {
-        this.text = text;
-    }
-
-    @Override
-    public void toMarkdown(StringBuilder sb) {
-        sb.append(text);
+public class Text extends BaseText implements TextElement {
+    public Text(final String text) {
+        super(text);
     }
 }
