@@ -102,14 +102,7 @@ public class Md2Html {
         Apostrophe,
     }
 
-    static class SplitSignsElem {
-        public final int ind;
-        public final SplitSign splitSign;
-
-        public SplitSignsElem(int ind, SplitSign splitSign) {
-            this.ind = ind;
-            this.splitSign = splitSign;
-        }
+    record SplitSignsElem(int ind, SplitSign splitSign) {
     }
 
     private static void dropNewElement(List<HtmlAble> ans, StringBuilder sb, int levelHeader, TypeTextGroup group) {
@@ -118,7 +111,7 @@ public class Md2Html {
 
             String paragraphText = sb.toString();
             // System.err.printf("Paragraph: %s%n", paragraphText);
-            // sb.setLength(0);
+
             boolean isIgnore = false;
             for (int i = 0; i < paragraphText.length(); i++) {
                 char ch = paragraphText.charAt(i);
@@ -171,17 +164,20 @@ public class Md2Html {
         sb.setLength(0);
     }
 
+    private static int getSizeSplitSign(SplitSign splitSign) {
+        return switch (splitSign) {
+            case Star, Under, Apostrophe -> 1;
+            case DoubleStar, DoubleHyphen, DoubleUnder -> 2;
+        };
+    }
+
     private static List<TextElement> parseSplitSignsList(int l, int r, int ls, int rs,
                                                          List<SplitSignsElem> splitSigns,
                                                          String textParagraph) {
-        if (splitSigns.isEmpty()) {
-            return List.of(new Text(textParagraph));
-        }
-        if (l > r) {
-            return List.of();
+        if (l >= r) {
+            return List.of(new Text(textParagraph.substring(ls, rs)));
         }
         List<TextElement> paragraphElems = new ArrayList<>();
-
         // System.err.printf("%d %d %n", l, r);
 
         for (int i = l; i < r; i++) {
@@ -191,46 +187,23 @@ public class Md2Html {
                 prevInd = splitSigns.get(i - 1).ind + 1;
             }
             int ind = splitSigns.get(i).ind;
-            switch (splitSigns.get(i).splitSign) {
-                case DoubleStar:
-                case DoubleUnder:
-                case DoubleHyphen:
-                    ind--;
-                    break;
-            }
+            ind -= getSizeSplitSign(splitSigns.get(i).splitSign) - 1;
             if (ind - prevInd > 0) {
                 paragraphElems.add(new Text(textParagraph.substring(prevInd, ind)));
             }
             for (int j = i + 1; j < r; j++) {
                 if (splitSigns.get(i).splitSign == splitSigns.get(j).splitSign) {
-                    switch (splitSigns.get(i).splitSign) {
-                        case Apostrophe:
-                            paragraphElems.add(new Code(
-                                    parseSplitSignsList(i + 1, j,
-                                            splitSigns.get(i).ind + 1, splitSigns.get(j).ind,
-                                            splitSigns, textParagraph)));
-                            break;
-                        case Star:
-                        case Under:
-                            paragraphElems.add(new Emphasis(
-                                    parseSplitSignsList(i + 1, j,
-                                            splitSigns.get(i).ind + 1, splitSigns.get(j).ind,
-                                            splitSigns, textParagraph)));
-                            break;
-                        case DoubleStar:
-                        case DoubleUnder:
-                            paragraphElems.add(new Strong(
-                                    parseSplitSignsList(i + 1, j,
-                                            splitSigns.get(i).ind + 1, splitSigns.get(j).ind - 1,
-                                            splitSigns, textParagraph)));
-                            break;
-                        case DoubleHyphen:
-                            paragraphElems.add(new Strikeout(
-                                    parseSplitSignsList(i + 1, j,
-                                            splitSigns.get(i).ind + 1, splitSigns.get(j).ind - 1,
-                                            splitSigns, textParagraph)));
-                            break;
-                    }
+                    int szSignEnd = getSizeSplitSign(splitSigns.get(j).splitSign);
+                    List<TextElement> innerElements = parseSplitSignsList(i + 1, j,
+                            splitSigns.get(i).ind + 1, splitSigns.get(j).ind - szSignEnd + 1,
+                            splitSigns, textParagraph);
+
+                    paragraphElems.add(switch (splitSigns.get(i).splitSign) {
+                        case Apostrophe -> new Code(innerElements);
+                        case Star, Under -> new Emphasis(innerElements);
+                        case DoubleStar, DoubleUnder -> new Strong(innerElements);
+                        case DoubleHyphen -> new Strikeout(innerElements);
+                    });
                     i = j;
                     flag = true;
                     break;
