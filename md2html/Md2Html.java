@@ -180,7 +180,7 @@ public class Md2Html {
             }
             List<TextElement> paragraphElems = parseSplitSignsList(0, splitSigns.size(),
                     0, paragraphText.length(), splitSigns, paragraphText);
-            // System.err.printf("%s%n", paragraphText);
+
             switch (group) {
                 case Paragraph:
                     ans.add(new Paragraph(paragraphElems));
@@ -196,11 +196,9 @@ public class Md2Html {
                                                          List<SplitSignsElem> splitSigns,
                                                          String textParagraph) {
         if (l >= r) {
-            // System.err.printf("All text parse: %s%n", textParagraph.substring(ls, rs));
             return List.of(new Text(textParagraph.substring(ls, rs)));
         }
         List<TextElement> paragraphElems = new ArrayList<>();
-        // System.err.printf("%d %d %n", l, r);
 
         for (int i = l; i < r; i++) {
             boolean flag = false;
@@ -211,7 +209,6 @@ public class Md2Html {
             int ind = splitSigns.get(i).ind;
             ind -= getSizeSplitSign(splitSigns.get(i).splitSign) - 1;
             if (ind - prevInd > 0) {
-                // System.err.printf("Before element parse: %s%n", textParagraph.substring(prevInd, ind));
                 paragraphElems.add(new Text(textParagraph.substring(prevInd, ind)));
             }
             if (isOpenSign(splitSigns.get(i).splitSign)) {
@@ -247,9 +244,7 @@ public class Md2Html {
         }
         if (rs - ind > 0) {
             paragraphElems.add(new Text(textParagraph.substring(ind, rs)));
-            // System.err.printf("End parse: %s%n", textParagraph.substring(ind, rs));
         }
-        // System.err.printf("Ind + Next Ind: %d %d %n", ind, rs);
         return paragraphElems;
     }
 }
