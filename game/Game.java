@@ -28,49 +28,58 @@ public class Game {
         this.player2 = player2;
     }
 
-    public int play(Board board) {
+    private GameResult convert2GameResult(MoveResult moveRes) {
+        return switch (moveRes) {
+            case WinPlayer1 -> GameResult.WinPlayer1;
+            case WinPlayer2 -> GameResult.WinPlayer2;
+            case Draw -> GameResult.Draw;
+            default -> throw new IllegalStateException("Unexpected value: " + moveRes);
+        };
+    }
+
+    public GameResult play(Board board) {
         while (true) {
-            int result1 = getResultForPlayer(board, player1, player2, 1);
-            if (result1 >= 0) {
-                return result1;
+            MoveResult result1 = getResultForPlayer(board, player1, player2, 1);
+            if (result1 != MoveResult.None) {
+                return convert2GameResult(result1);
             }
 
-            int result2 = getResultForPlayer(board, player2, player1, 2);
-            if (result2 >= 0) {
-                return result2;
+            MoveResult result2 = getResultForPlayer(board, player2, player1, 2);
+            if (result2 != MoveResult.None) {
+                return convert2GameResult(result2);
             }
         }
     }
 
-    public int getResultForPlayer(final Board board, final Player player, final Player otherPlayer,
+    private MoveResult getResultForPlayer(final Board board, final Player player, final Player otherPlayer,
                                   final int no) {
         MoveResult result;
         int cntDrawRequests = 0;
         do {
             if (cntDrawRequests >= maxDrawRequests) {
-                return 3 - no;
+                return no == 1 ? MoveResult.WinPlayer2 : MoveResult.WinPlayer1;
             }
             result = move(board, player, otherPlayer, no);
             cntDrawRequests++;
         } while (result == MoveResult.DrawDenied);
-        return result.value;
+        return result;
     }
 
     private MoveResult move(final Board board, final Player player, final Player player2, final int no) {
         final Move move = player.move(board.getPosition(), board.getCell());
-        final Result result = board.makeMove(move);
+        final MoveBoardResult result = board.makeMove(move);
         log("Player " + no + " move: " + move);
         log("Position:\n" + board);
-        if (result == Result.WIN) {
+        if (result == MoveBoardResult.WIN) {
             log("Player " + no + " won");
             return no == 1 ? MoveResult.WinPlayer1 : MoveResult.WinPlayer2;
-        } else if (result == Result.LOSE) {
+        } else if (result == MoveBoardResult.LOSE) {
             log("Player " + no + " lose");
             return no == 1 ? MoveResult.WinPlayer2 : MoveResult.WinPlayer1;
-        } else if (result == Result.DRAW) {
+        } else if (result == MoveBoardResult.DRAW) {
             log("Draw");
             return MoveResult.Draw;
-        } else if (result == Result.DRAW_INVITE) {
+        } else if (result == MoveBoardResult.DRAW_INVITE) {
             log("Draw invite");
             boolean isDraw = player2.drawInvite();
             if (isDraw) {

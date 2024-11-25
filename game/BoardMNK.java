@@ -107,16 +107,16 @@ public class BoardMNK implements Board {
     }
 
     @Override
-    public Result makeMove(final Move move) {
+    public MoveBoardResult makeMove(final Move move) {
         if (!position.isValid(move)) {
-            return Result.LOSE;
+            return MoveBoardResult.LOSE;
         }
 
         switch (move.getMoveType()) {
             case GiveUp:
-                return Result.LOSE;
+                return MoveBoardResult.LOSE;
             case Draw:
-                return Result.DRAW_INVITE;
+                return MoveBoardResult.DRAW_INVITE;
             default:
                 break;
         }
@@ -137,14 +137,14 @@ public class BoardMNK implements Board {
 
 
         if (Math.max(Math.max(cntDiag1, cntDiag2), Math.max(cntCol, cntRow)) >= winCount) {
-            return Result.WIN;
+            return MoveBoardResult.WIN;
         }
         if (countCells >= rows * cols) {
-            return Result.DRAW;
+            return MoveBoardResult.DRAW;
         }
 
         turn = turn == Cell.X ? Cell.O : Cell.X;
-        return Result.UNKNOWN;
+        return MoveBoardResult.UNKNOWN;
     }
 
     private int getCntCells(int row, int col, int stepRow, int stepCol, Cell value) {

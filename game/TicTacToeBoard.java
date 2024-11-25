@@ -45,9 +45,9 @@ public class TicTacToeBoard implements Board, Position {
     }
 
     @Override
-    public Result makeMove(final Move move) {
+    public MoveBoardResult makeMove(final Move move) {
         if (!isValid(move)) {
-            return Result.LOSE;
+            return MoveBoardResult.LOSE;
         }
 
         cells[move.getRow()][move.getColumn()] = move.getValue();
@@ -70,7 +70,7 @@ public class TicTacToeBoard implements Board, Position {
                 }
             }
             if (inRow == 3 || inColumn == 3) {
-                return Result.WIN;
+                return MoveBoardResult.WIN;
             }
             if (cells[u][u] == turn) {
                 inDiag1++;
@@ -80,14 +80,14 @@ public class TicTacToeBoard implements Board, Position {
             }
         }
         if (inDiag1 == 3 || inDiag2 == 3) {
-            return Result.WIN;
+            return MoveBoardResult.WIN;
         }
         if (empty == 0) {
-            return Result.DRAW;
+            return MoveBoardResult.DRAW;
         }
 
         turn = turn == Cell.X ? Cell.O : Cell.X;
-        return Result.UNKNOWN;
+        return MoveBoardResult.UNKNOWN;
     }
 
     @Override
