@@ -9,14 +9,24 @@ import java.util.Scanner;
 public class HumanPlayer implements Player {
     private final PrintStream out;
     private final Scanner in;
+    private final String name;
 
-    public HumanPlayer(final PrintStream out, final Scanner in) {
+    public HumanPlayer(final String name, final PrintStream out, final Scanner in) {
         this.out = out;
         this.in = in;
+        this.name = name;
+    }
+
+    public HumanPlayer(final PrintStream out, final Scanner in) {
+        this("Human", out, in);
     }
 
     public HumanPlayer() {
         this(System.out, new Scanner(System.in));
+    }
+
+    public HumanPlayer(String name) {
+        this(name, System.out, new Scanner(System.in));
     }
 
     private void clearLineInput() {
@@ -83,5 +93,15 @@ public class HumanPlayer implements Player {
     public boolean drawInvite() {
         out.println("Do you wanna draw? [Y/n]");
         return in.next().toLowerCase().startsWith("y");
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Player %s", name);
     }
 }

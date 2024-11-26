@@ -21,4 +21,9 @@ public class SequentialPlayer implements Player {
     public boolean drawInvite() {
         return false;
     }
+
+    @Override
+    public String getName() {
+        return "Sequential Player";
+    }
 }

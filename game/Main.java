@@ -1,11 +1,16 @@
 package game;
 
+import java.util.List;
+
 /**
  * @author Georgiy Korneev (kgeorgiy@kgeorgiy.info)
  */
 public class Main {
     public static void main(String[] args) {
-        final Game game = new Game(false, new HumanPlayer(), new HumanPlayer());
+        final SwissSystem system = new SwissSystem(List.of(new HumanPlayer(), new HumanPlayer()));
+        system.start();
+
+        /*final Game game = new Game(false, new HumanPlayer(), new HumanPlayer());
         GameResult result;
         do {
             Board board = new BoardMNK(6, 6, 2, true);
@@ -18,6 +23,6 @@ public class Main {
                 System.out.println(board);
                 System.out.printf("Game result: player no %d win!%n", result.value);
             }
-        } while (result != GameResult.Draw);
+        } while (result != GameResult.Draw);*/
     }
 }

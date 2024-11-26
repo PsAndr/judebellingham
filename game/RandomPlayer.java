@@ -32,4 +32,9 @@ public class RandomPlayer implements Player {
     public boolean drawInvite() {
         return false;
     }
+
+    @Override
+    public String getName() {
+        return "Random Player";
+    }
 }

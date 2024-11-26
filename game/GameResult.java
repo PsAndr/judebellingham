@@ -7,7 +7,7 @@ public enum GameResult {
 
     public final int value;
 
-    private GameResult(final int value) {
+    GameResult(final int value) {
         this.value = value;
     }
 }
