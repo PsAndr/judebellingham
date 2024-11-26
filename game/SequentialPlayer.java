@@ -26,4 +26,9 @@ public class SequentialPlayer implements Player {
     public String getName() {
         return "Sequential Player";
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

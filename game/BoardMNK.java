@@ -154,6 +154,19 @@ public class BoardMNK implements Board {
         return MoveBoardResult.UNKNOWN;
     }
 
+    @Override
+    public Board copy() {
+        int r = rows;
+        int c = cols;
+
+        if (isRhombus) {
+            r = (r + 1) / 2;
+            c = (c + 1) / 2;
+        }
+
+        return new BoardMNK(r, c, winCount, isRhombus);
+    }
+
     private int getCntCells(int row, int col, int stepRow, int stepCol, Cell value) {
         int cnt = 0;
         while (isValid(row, col) && cells[row][col] == value) {

@@ -32,7 +32,7 @@ public class HumanPlayer implements Player {
     private void clearLineInput() {
         try {
             in.nextLine();
-        } catch (Exception ignored) {
+        } catch (RuntimeException ignored) {
         }
     }
 
@@ -66,7 +66,7 @@ public class HumanPlayer implements Player {
                             out.println("Invalid number");
                             break;
                     }
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     out.println("Invalid input");
                 } finally {
                     clearLineInput();
@@ -80,7 +80,7 @@ public class HumanPlayer implements Player {
                 if (position.isValid(move)) {
                     return move;
                 }
-            } catch (Exception ex) {
+            } catch (RuntimeException ignore) {
                 out.println("Invalid input (can`t parse)");
                 clearLineInput();
                 continue;

@@ -60,8 +60,8 @@ public class SwissSystem {
     private record MatchInfo(int number, GameResult result, PlayerInfo player1, PlayerInfo player2) {
         @Override
         public String toString() {
-            return String.format("%d. %s (%d)    vs    %s (%d)  |  %s", number, player1.getPlayer(),
-                    player1.number, player2.getPlayer(), player2.number, result);
+            return String.format("%d. %s (%d)    vs    %s (%d)  |  %s", number, player1.getPlayer().getName(),
+                    player1.number, player2.getPlayer().getName(), player2.number, result);
         }
 
         @Override
@@ -84,16 +84,19 @@ public class SwissSystem {
         }
     }
 
+    private final Board standardBoard;
     private final List<Player> players;
     private final List<PlayerInfo> playerInfos;
     private final List<MatchInfo> matchesInfos;
 
     private final boolean log;
 
-    public SwissSystem(final List<Player> players, final boolean log) {
+    public SwissSystem(final Board standardBoard,
+                       final List<Player> players, final boolean log) {
         if (players.isEmpty()) {
             throw new IllegalArgumentException("Player list is empty");
         }
+        this.standardBoard = standardBoard;
         this.log = log;
         this.players = players;
         playerInfos = new ArrayList<>(players.size());
@@ -103,8 +106,8 @@ public class SwissSystem {
         }
     }
 
-    public SwissSystem(final List<Player> players) {
-        this(players, true);
+    public SwissSystem(final Board board, final List<Player> players) {
+        this(board, players, true);
     }
 
     private List<PlayerInfo> groupPlay(List<PlayerInfo> scoreGroup, List<Set<PlayerInfo>> matchesPlayed) {
@@ -133,9 +136,9 @@ public class SwissSystem {
                 }
 
                 log("New Game!");
-                log(String.format("X: %s (%d)    vs    O: %s (%d)%n", player1.getPlayer(), player1.number,
-                        player2.getPlayer(), player2.number));
-                Board board = new BoardMNK(10, 10, 3);
+                log(String.format("X: %s (%d)    vs    O: %s (%d)%n", player1.getPlayer().getName(), player1.number,
+                        player2.getPlayer().getName(), player2.number));
+                Board board = standardBoard.copy();
                 GameResult result = new Game(false, player1.getPlayer(), player2.getPlayer()).play(board);
                 MatchInfo matchInfo = new MatchInfo(matchesInfos.size() + 1, result, player1, player2);
                 matchesInfos.add(matchInfo);

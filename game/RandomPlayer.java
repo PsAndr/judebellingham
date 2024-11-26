@@ -37,4 +37,9 @@ public class RandomPlayer implements Player {
     public String getName() {
         return "Random Player";
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

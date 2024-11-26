@@ -7,4 +7,5 @@ public interface Board {
     Position getPosition();
     Cell getCell();
     MoveBoardResult makeMove(Move move);
+    Board copy();
 }

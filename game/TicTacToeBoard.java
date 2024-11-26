@@ -91,6 +91,11 @@ public class TicTacToeBoard implements Board, Position {
     }
 
     @Override
+    public Board copy() {
+        return new TicTacToeBoard();
+    }
+
+    @Override
     public boolean isValid(final Move move) {
         return 0 <= move.getRow() && move.getRow() < 3
                 && 0 <= move.getColumn() && move.getColumn() < 3

@@ -69,13 +69,13 @@ public class Game {
         final Move move;
         try {
             move = player.move(board.getPosition(), board.getCell());
-        } catch (final Exception ignore) {
+        } catch (final RuntimeException ignore) {
             return no == 1 ? MoveResult.WinPlayer2 : MoveResult.WinPlayer1;
         }
         final MoveBoardResult result;
         try {
             result = board.makeMove(move);
-        } catch (final Exception ignore) {
+        } catch (final RuntimeException ignore) {
             return no == 1 ? MoveResult.WinPlayer2 : MoveResult.WinPlayer1;
         }
         log("Player " + no + " move: " + move);
@@ -94,7 +94,7 @@ public class Game {
             boolean isDraw;
             try {
                 isDraw = player2.drawInvite();
-            } catch (final Exception ignore) {
+            } catch (final RuntimeException ignore) {
                 isDraw = true;
             }
             if (isDraw) {
