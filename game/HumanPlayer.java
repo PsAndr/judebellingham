@@ -92,7 +92,8 @@ public class HumanPlayer implements Player {
     @Override
     public boolean drawInvite() {
         out.println("Do you wanna draw? [Y/n]");
-        return in.next().toLowerCase().startsWith("y");
+        String answer = in.nextLine().toLowerCase();
+        return answer.startsWith("y") || answer.startsWith("д");
     }
 
     @Override

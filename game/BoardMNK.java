@@ -61,15 +61,14 @@ public class BoardMNK implements Board {
 
     public BoardMNK(int countRows, int countColumns, int count2Win, boolean isRhombus) {
         if (countRows <= 0 || countColumns <= 0 || count2Win <= 0) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Invalid number of rows or columns");
         }
 
         if (isRhombus && countRows != countColumns) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Rhombus rows and columns must be the same");
         }
 
         this.isRhombus = isRhombus;
-
         if (isRhombus) {
             rows = countRows * 2 - 1;
             cols = countColumns * 2 - 1;
@@ -81,7 +80,7 @@ public class BoardMNK implements Board {
         winCount = count2Win;
 
         if (rows < winCount && cols < winCount) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("No win chance");
         }
 
         cells = new Cell[rows][cols];
@@ -124,16 +123,24 @@ public class BoardMNK implements Board {
         cells[move.getRow()][move.getColumn()] = move.getValue();
         countCells++;
 
-        int cntDiag1 = getCntCells(move.getRow(), move.getColumn(), 1, 1, move.getValue()) +
-                getCntCells(move.getRow() - 1, move.getColumn() - 1, -1, -1, move.getValue());
-        int cntDiag2 = getCntCells(move.getRow(), move.getColumn(), 1, -1, move.getValue()) +
-                getCntCells(move.getRow() - 1, move.getColumn() + 1, -1, 1, move.getValue());
+        int cntDiag1 = getCntCells(move.getRow(), move.getColumn(),
+                1, 1, move.getValue()) +
+                getCntCells(move.getRow() - 1, move.getColumn() - 1,
+                        -1, -1, move.getValue());
+        int cntDiag2 = getCntCells(move.getRow(), move.getColumn(),
+                1, -1, move.getValue()) +
+                getCntCells(move.getRow() - 1, move.getColumn() + 1,
+                        -1, 1, move.getValue());
 
-        int cntRow = getCntCells(move.getRow(), move.getColumn(), 0, -1, move.getValue()) +
-                getCntCells(move.getRow(), move.getColumn() + 1, 0, 1, move.getValue());
+        int cntRow = getCntCells(move.getRow(), move.getColumn(),
+                0, -2, move.getValue()) +
+                getCntCells(move.getRow(), move.getColumn() + 2,
+                        0, 2, move.getValue());
 
-        int cntCol = getCntCells(move.getRow(), move.getColumn(), -1, 0, move.getValue()) +
-                getCntCells(move.getRow() + 1, move.getColumn(), 1, 0, move.getValue());
+        int cntCol = getCntCells(move.getRow(), move.getColumn(),
+                -2, 0, move.getValue()) +
+                getCntCells(move.getRow() + 2, move.getColumn(),
+                        2, 0, move.getValue());
 
 
         if (Math.max(Math.max(cntDiag1, cntDiag2), Math.max(cntCol, cntRow)) >= winCount) {
@@ -167,7 +174,8 @@ public class BoardMNK implements Board {
         int rowsPart = rowsHalf - Math.abs(row - rowsHalf);
 
         boolean flagRhombus = column >= colsHalf - rowsPart && column <= colsHalf + rowsPart;
-        return flagRhombus && flag;
+        boolean flagRhombusPart = Math.abs(column - (colsHalf - rowsPart)) % 2 == 0;
+        return flagRhombus && flagRhombusPart && flag;
     }
 
     @Override

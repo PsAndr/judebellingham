@@ -66,8 +66,18 @@ public class Game {
     }
 
     private MoveResult move(final Board board, final Player player, final Player player2, final int no) {
-        final Move move = player.move(board.getPosition(), board.getCell());
-        final MoveBoardResult result = board.makeMove(move);
+        final Move move;
+        try {
+            move = player.move(board.getPosition(), board.getCell());
+        } catch (final Exception ignore) {
+            return no == 1 ? MoveResult.WinPlayer2 : MoveResult.WinPlayer1;
+        }
+        final MoveBoardResult result;
+        try {
+            result = board.makeMove(move);
+        } catch (final Exception ignore) {
+            return no == 1 ? MoveResult.WinPlayer2 : MoveResult.WinPlayer1;
+        }
         log("Player " + no + " move: " + move);
         log("Position:\n" + board);
         if (result == MoveBoardResult.WIN) {
@@ -81,7 +91,12 @@ public class Game {
             return MoveResult.Draw;
         } else if (result == MoveBoardResult.DRAW_INVITE) {
             log("Draw invite");
-            boolean isDraw = player2.drawInvite();
+            boolean isDraw;
+            try {
+                isDraw = player2.drawInvite();
+            } catch (final Exception ignore) {
+                isDraw = true;
+            }
             if (isDraw) {
                 log("Draw");
                 return MoveResult.Draw;

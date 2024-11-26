@@ -7,13 +7,14 @@ import java.util.List;
  */
 public class Main {
     public static void main(String[] args) {
-        final SwissSystem system = new SwissSystem(List.of(new HumanPlayer(), new HumanPlayer()));
+        final SwissSystem system = new SwissSystem(List.of(new HumanPlayer(), new HumanPlayer(),
+                new HumanPlayer(), new HumanPlayer(), new HumanPlayer()));
         system.start();
 
         /*final Game game = new Game(false, new HumanPlayer(), new HumanPlayer());
         GameResult result;
         do {
-            Board board = new BoardMNK(6, 6, 2, true);
+            Board board = new BoardMNK(4, 4, 2, true);
             System.out.println("New game!");
             result = game.play(board);
             if (result == GameResult.Draw) {
