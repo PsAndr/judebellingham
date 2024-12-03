@@ -5,17 +5,17 @@ import java.util.Map;
 public class Variable implements MaxExpression {
     private final String name;
 
-    public Variable(String name) {
+    public Variable(final String name) {
         this.name = name;
     }
 
     @Override
-    public int evaluate(int x) {
+    public int evaluate(final int x) {
         return x;
     }
 
     @Override
-    public int evaluate(int x, int y, int z) {
+    public int evaluate(final int x, final int y, final int z) {
         return switch (name) {
             case "x" -> x;
             case "y" -> y;
@@ -25,7 +25,7 @@ public class Variable implements MaxExpression {
     }
 
     @Override
-    public float evaluateF(Map<String, Float> variables) {
+    public float evaluateF(final Map<String, Float> variables) {
         if (variables.containsKey(name)) {
             return variables.get(name);
         }
@@ -49,11 +49,10 @@ public class Variable implements MaxExpression {
 
     @Override
     public boolean equals(Object obj) {
-        throw new RuntimeException();
-        /*if (obj instanceof Variable var) {
+        if (obj instanceof Variable var) {
             return name.equals(var.name);
         }
-        return false;*/
+        return false;
     }
 
     @Override

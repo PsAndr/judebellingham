@@ -3,29 +3,23 @@ package expression;
 import java.util.Map;
 
 public class Const implements MaxExpression {
-    private final int value;
-    private final float valueF;
+    private final double value;
 
     private final boolean real;
 
-    public Const(int value) {
+    public Const(final int value) {
         this.value = value;
-        this.valueF = 0;
         real = false;
     }
 
-    public Const(float value) {
-        this.valueF = value;
-        this.value = 0;
+    public Const(final float value) {
+        this.value = value;
         real = true;
     }
 
     @Override
-    public int evaluate(int x) {
-        if (real) {
-            return Math.round(valueF);
-        }
-        return value;
+    public int evaluate(final int x) {
+        return Math.toIntExact(Math.round(value));
     }
 
     @Override
@@ -36,26 +30,22 @@ public class Const implements MaxExpression {
     @Override
     public String toString() {
         if (real) {
-            return String.valueOf(valueF);
+            return String.valueOf(Double.valueOf(value).floatValue());
         }
-        return String.valueOf(value);
+        return String.valueOf(Math.round(value));
     }
 
     @Override
     public boolean equals(Object obj) {
-        throw new RuntimeException();
-        /*if (obj instanceof Const c) {
+        if (obj instanceof Const c) {
             return this.value == c.value;
         }
-        return false;*/
+        return false;
     }
 
     @Override
     public int hashCode() {
-        if (real) {
-            return Math.round(valueF);
-        }
-        return value;
+        return Math.toIntExact(Math.round(value) % Integer.MAX_VALUE);
     }
 
     @Override
@@ -64,12 +54,12 @@ public class Const implements MaxExpression {
     }
 
     @Override
-    public float evaluateF(Map<String, Float> variables) {
-        return this.valueF;
+    public float evaluateF(final Map<String, Float> variables) {
+        return Double.valueOf(value).floatValue();
     }
 
     @Override
-    public int evaluate(int x, int y, int z) {
+    public int evaluate(final int x, final int y, final int z) {
         return evaluate(x);
     }
 }

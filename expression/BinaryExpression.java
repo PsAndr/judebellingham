@@ -13,21 +13,21 @@ public abstract class BinaryExpression implements MaxExpression {
     }
 
     protected abstract String getSign();
-    protected abstract int getOperationResult(int a, int b);
-    protected abstract float getOperationResult(float a, float b);
+    protected abstract int getOperationResult(final int a, final int b);
+    protected abstract float getOperationResult(final float a, final float b);
 
     @Override
-    public int evaluate(int x) {
+    public int evaluate(final int x) {
         return getOperationResult(left.evaluate(x), right.evaluate(x));
     }
 
     @Override
-    public float evaluateF(Map<String, Float> variables) {
+    public float evaluateF(final Map<String, Float> variables) {
         return getOperationResult(left.evaluateF(variables), right.evaluateF(variables));
     }
 
     @Override
-    public int evaluate(int x, int y, int z) {
+    public int evaluate(final int x, final int y, final int z) {
         return getOperationResult(left.evaluate(x, y, z), right.evaluate(x, y, z));
     }
 
@@ -38,12 +38,11 @@ public abstract class BinaryExpression implements MaxExpression {
 
     @Override
     public boolean equals(Object o) {
-        throw new RuntimeException();
-        /*if (o instanceof BinaryExpression other) {
+        if (o instanceof BinaryExpression other) {
             return left.equals(other.left) && right.equals(other.right)
                     && Objects.equals(getSign(), other.getSign());
         }
-        return false;*/
+        return false;
     }
 
     @Override

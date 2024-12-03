@@ -63,6 +63,10 @@ public class TestGenerator<C> {
         return Node.op(name, priority, arg);
     }
 
+    private static <C> Node<C> f(final String left, final Node<C> arg) {
+        return Node.op(left, Integer.MAX_VALUE, arg);
+    }
+
     private static <C> Node<C> f(final String name, final Node<C> arg1, final Node<C> arg2) {
         return Node.op(name, arg1, arg2);
     }
@@ -89,6 +93,30 @@ public class TestGenerator<C> {
                 vars -> f(name, priority, f("+", v(vars), v(vars))),
                 vars -> f(name, priority, f(name, priority, v(vars))),
                 vars -> f(name, priority, f("/", f(name, priority, v(vars)), f("+", v(vars), v(vars)))),
+                p1,
+                p2,
+                vars -> f("+", p1.apply(vars), p2.apply(vars))
+        );
+    }
+
+    public void unary(final String left, final String right) {
+        generator.add(left, 1);
+        renderer.unary(left, right);
+        forbidden.add(left);
+        forbidden.add(right);
+
+        if (verbose) {
+            basicTests.add(vars -> Stream.concat(consts.stream(), vars.stream()).map(a -> f(left, a)));
+        } else {
+            basicTests(vars -> f(left, c()), vars -> f(left, v(vars)));
+        }
+
+        final Function<List<Node<C>>, Node<C>> p1 = vars -> f(left, f(left, f("+", v(vars), c())));
+        final Function<List<Node<C>>, Node<C>> p2 = vars -> f("*", v(vars), f("*", v(vars), f(left, c())));
+        basicTests(
+                vars -> f(left, f("+", v(vars), v(vars))),
+                vars -> f(left, f(left, v(vars))),
+                vars -> f(left, f("/", f(left, v(vars)), f("+", v(vars), v(vars)))),
                 p1,
                 p2,
                 vars -> f("+", p1.apply(vars), p2.apply(vars))

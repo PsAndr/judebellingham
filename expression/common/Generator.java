@@ -1,9 +1,6 @@
 package expression.common;
 
-import base.ExtendedRandom;
-import base.Functional;
-import base.Pair;
-import base.TestCounter;
+import base.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,7 +17,7 @@ public class Generator<C> {
     private final ExtendedRandom random;
     private final Supplier<C> constant;
 
-    private final List<Op<Integer>> ops = new ArrayList<>();
+    private final List<Named<Integer>> ops = new ArrayList<>();
     private final Set<String> forbidden = new HashSet<>();
 
     public Generator(final ExtendedRandom random, final Supplier<C> constant) {
@@ -29,7 +26,7 @@ public class Generator<C> {
     }
 
     public void add(final String name, final int arity) {
-        ops.add(Op.of(name, arity));
+        ops.add(Named.of(name, arity));
         forbidden.add(name);
     }
 
@@ -42,12 +39,12 @@ public class Generator<C> {
         if (nullary || ops.isEmpty()) {
             return random.nextBoolean() ? random.randomItem(variables) : Node.constant(constant.get());
         } else {
-            final Op<Integer> op = random.randomItem(ops);
-            if (Math.abs(op.value) == 1) {
-                return Node.op(op.name, (op.value + 1) >> 1, unary.get());
+            final Named<Integer> op = random.randomItem(ops);
+            if (Math.abs(op.value()) == 1) {
+                return Node.op(op.name(), (op.value() + 1) >> 1, unary.get());
             } else {
                 final Pair<Node<C>, Node<C>> pair = binary.get();
-                return Node.op(op.name, pair.first(), pair.second());
+                return Node.op(op.name(), pair.first(), pair.second());
             }
         }
     }
@@ -87,7 +84,7 @@ public class Generator<C> {
         testRandom(counter, variables, consumer, 4, 777 / d, 1, this::generatePartialDepth);
     }
 
-    private <C, E> void testRandom(
+    private <E> void testRandom(
             final TestCounter counter,
             final ExpressionKind.Variables<E> variables,
             final Consumer<Expr<C, E>> consumer,

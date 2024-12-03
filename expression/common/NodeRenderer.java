@@ -25,6 +25,7 @@ public class NodeRenderer<C> {
 
     private final Renderer<C, Settings, Node<C>> nodeRenderer = new Renderer<>(Node::constant);
     private final Map<String, Priority> priorities = new HashMap<>();
+    private final Map<String, String> brackets = new HashMap<>();
     private final ExtendedRandom random;
 
     public NodeRenderer(final ExtendedRandom random) {
@@ -41,6 +42,14 @@ public class NodeRenderer<C> {
         nodeRenderer.unary(
                 name,
                 (settings, arg) -> settings.extra(Node.op(name, priority, inner(settings, priority, arg, space)), random)
+        );
+    }
+
+    public void unary(final String left, final String right) {
+        brackets.put(left, right);
+        nodeRenderer.unary(
+                left,
+                (settings, arg) -> settings.extra(Node.op(left, Integer.MAX_VALUE, arg), random)
         );
     }
 
@@ -134,8 +143,9 @@ public class NodeRenderer<C> {
         return node.cata(
                 String::valueOf,
                 name -> name,
-                (name, priority, arg) -> name == PAREN ? parens(arg, parens) :
-                        (priority & 1) == 1 ? name + arg : arg + name,
+                (name, priority, arg) -> name == PAREN ? parens(arg, parens)
+                        : priority == Integer.MAX_VALUE ? name + arg + brackets.get(name)
+                        : (priority & 1) == 1 ? name + arg : arg + name,
                 (name, a, b) -> a + " " + name + " " + b
         );
     }

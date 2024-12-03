@@ -1,7 +1,5 @@
 package expression;
 
-import java.util.Map;
-
 public class Subtract extends BinaryExpression {
     public Subtract(final MaxExpression left, final MaxExpression right) {
         super(left, right);
@@ -13,12 +11,12 @@ public class Subtract extends BinaryExpression {
     }
 
     @Override
-    protected int getOperationResult(int a, int b) {
+    protected int getOperationResult(final int a, final int b) {
         return a - b;
     }
 
     @Override
-    protected float getOperationResult(float a, float b) {
+    protected float getOperationResult(final float a, final float b) {
         return a - b;
     }
 

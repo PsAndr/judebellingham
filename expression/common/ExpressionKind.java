@@ -70,6 +70,14 @@ public class ExpressionKind<E extends ToMiniString, C> {
         return kind.getName();
     }
 
+    public ExpressionKind<E, C> withVariables(final Variables<E> variables) {
+        return new ExpressionKind<>(type, kind, variables, evaluator);
+    }
+
+    public Variables<E> variables() {
+        return variables;
+    }
+
     @FunctionalInterface
     public interface Variables<E> {
         List<Pair<String, E>> generate(final ExtendedRandom random, final int count);
