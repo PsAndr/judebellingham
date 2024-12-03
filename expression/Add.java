@@ -13,8 +13,13 @@ public class Add extends BinaryExpression {
     }
 
     @Override
-    public int evaluate(int x) {
-        return left.evaluate(x) + right.evaluate(x);
+    protected int getOperationResult(int a, int b) {
+        return a + b;
+    }
+
+    @Override
+    protected float getOperationResult(float a, float b) {
+        return a + b;
     }
 
     @Override
@@ -23,17 +28,7 @@ public class Add extends BinaryExpression {
     }
 
     @Override
-    public boolean isFlag() {
+    public boolean isChangeOperation() {
         return true;
-    }
-
-    @Override
-    public float evaluateF(Map<String, Float> variables) {
-        return left.evaluateF(variables) + right.evaluateF(variables);
-    }
-
-    @Override
-    public int evaluate(int x, int y, int z) {
-        return left.evaluate(x, y, z) + right.evaluate(x, y, z);
     }
 }

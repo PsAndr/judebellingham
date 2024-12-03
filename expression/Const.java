@@ -59,7 +59,7 @@ public class Const implements MaxExpression {
     }
 
     @Override
-    public boolean isFlag() {
+    public boolean isChangeOperation() {
         return true;
     }
 

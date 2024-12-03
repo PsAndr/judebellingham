@@ -13,22 +13,17 @@ public class Subtract extends BinaryExpression {
     }
 
     @Override
-    public int evaluate(int x) {
-        return left.evaluate(x) - right.evaluate(x);
+    protected int getOperationResult(int a, int b) {
+        return a - b;
+    }
+
+    @Override
+    protected float getOperationResult(float a, float b) {
+        return a - b;
     }
 
     @Override
     public int getPriority() {
         return 1;
-    }
-
-    @Override
-    public float evaluateF(Map<String, Float> variables) {
-        return left.evaluateF(variables) - right.evaluateF(variables);
-    }
-
-    @Override
-    public int evaluate(int x, int y, int z) {
-        return left.evaluate(x, y, z) - right.evaluate(x, y, z);
     }
 }

@@ -16,6 +16,6 @@ public interface ToMiniString {
     }
 
     default int getPriority() { return 0; }
-    default boolean isFlag() { return false; }  // todo: name normal need
-    default boolean isFlag2() { return false; }  // todo: name normal need
+    default boolean isChangeOperation() { return false; }
+    default boolean isPriorityOperation() { return false; }
 }
