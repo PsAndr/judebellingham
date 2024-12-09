@@ -41,6 +41,14 @@ public final class Operations {
     public static final Operation FACTORIAL_O = unary("!", 0, (n, c) ->
             LongStream.range(1, Math.min(Math.abs(n) + 1, 0x3f)).reduce(1, (a, b) -> (a * b) & 0xfffffffffL));
     
+    // === Sqrt
+    public static final Operation SQRT_O = unary("√", 1, a -> (long) Math.sqrt(a));
+    private static final Reason NEGATIVE_SQRT = new Reason("Square root of negative value");
+    public static final Operation SQRT_C = unary("sqrt", 1, NEGATIVE_SQRT.less(0, a -> (long) Math.sqrt(a)));
+
+    // === Cbrt
+    public static final Operation CBRT = unary("∛", 1, a -> (long) Math.cbrt(a));
+
     // === Common
 
     private Operations() {

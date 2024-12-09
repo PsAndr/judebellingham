@@ -2,11 +2,14 @@ package expression;
 
 import java.util.Map;
 
-public class Variable implements MaxExpression {
+public class Variable implements SimpleExpression, SimpleRightExpression {
     private final String name;
 
     public Variable(final String name) {
         this.name = name;
+        if (name.isEmpty()) {
+            throw new RuntimeException("Invalid variable name: " + name);
+        }
     }
 
     @Override
@@ -14,9 +17,13 @@ public class Variable implements MaxExpression {
         return x;
     }
 
+    public String getNameId() {
+        return String.valueOf(name.charAt(name.length() - 1));
+    }
+
     @Override
     public int evaluate(final int x, final int y, final int z) {
-        return switch (name) {
+        return switch (getNameId()) {
             case "x" -> x;
             case "y" -> y;
             case "z" -> z;
@@ -26,8 +33,9 @@ public class Variable implements MaxExpression {
 
     @Override
     public float evaluateF(final Map<String, Float> variables) {
-        if (variables.containsKey(name)) {
-            return variables.get(name);
+        String id = getNameId();
+        if (variables.containsKey(id)) {
+            return variables.get(id);
         }
         throw new RuntimeException("Variable " + name + " not found");
     }

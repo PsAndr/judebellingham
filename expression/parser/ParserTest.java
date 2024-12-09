@@ -43,6 +43,8 @@ public final class ParserTest {
             .variant("Square", SQUARE)
             .variant("Cube", CUBE)
             .variant("Factorial", FACTORIAL_O)
+            .variant("Sqrt", SQRT_O)
+            .variant("Cbrt", CBRT)            
             .selector();
 
     private ParserTest() {
