@@ -29,6 +29,4 @@ public class Add extends BinaryExpression {
     public boolean isChangeOperation() {
         return true;
     }
-
-
 }
