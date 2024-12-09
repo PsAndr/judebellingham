@@ -2,15 +2,23 @@ package expression;
 
 import java.util.Map;
 
-public class Factorial implements SimpleRightExpression {
-    public MaxExpression expression;
-
-    public Factorial(MaxExpression expression) {
-        this.expression = expression;
+public class Factorial extends UnaryExpression {
+    public Factorial(final MaxExpression expression) {
+        super(expression);
     }
 
     @Override
-    public int evaluate(int x) {
+    protected boolean isRight() {
+        return true;
+    }
+
+    @Override
+    protected String getSign() {
+        return "!";
+    }
+
+    @Override
+    public int evaluate(final int x) {
         return fact(expression.evaluate(x));
     }
 
@@ -18,12 +26,8 @@ public class Factorial implements SimpleRightExpression {
         if (n == Integer.MIN_VALUE) {
             return 0;
         }
-        if (n == Integer.MAX_VALUE) {
-            return 0;
-        }
         n = Math.abs(n);
         int ans = 1;
-        // System.err.println("FACT: " + n);
         for (int i = 2; i <= n; i++) {
             ans *= i;
             if (ans == 0) {
@@ -34,34 +38,17 @@ public class Factorial implements SimpleRightExpression {
     }
 
     @Override
-    public float evaluateF(Map<String, Float> variables) {
+    public float evaluateF(final Map<String, Float> variables) {
         throw new ArithmeticException();
     }
 
     @Override
-    public int evaluate(int x, int y, int z) {
+    public int evaluate(final int x, final int y, final int z) {
         return fact(expression.evaluate(x, y, z));
     }
 
     @Override
     public int getPriority() {
-        return Integer.MAX_VALUE;
-    }
-
-    @Override
-    public String toMiniString() {
-        String ans;
-        if (expression instanceof SimpleRightExpression || expression instanceof SimpleExpression) {
-            ans = expression.toMiniString() + "!";
-        } else {
-            ans = "(" + expression.toMiniString() + ")!";
-        }
-        // System.err.println("TO MINI STRING::: " + this + " | " + ans);
-        return ans;
-    }
-
-    @Override
-    public String toString() {
-        return "(" + expression + ")!";
+        return 9;
     }
 }

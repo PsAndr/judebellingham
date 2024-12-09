@@ -7,6 +7,21 @@ import java.util.Objects;
 
 public class ExpressionParser implements TripleParser {
     public static class WrongExpressionException extends RuntimeException {
+        public WrongExpressionException(String message) {
+            super(message);
+        }
+
+        public WrongExpressionException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public WrongExpressionException(Throwable cause) {
+            super(cause);
+        }
+
+        public WrongExpressionException() {
+            super();
+        }
     }
 
     private enum Operation {
@@ -58,42 +73,22 @@ public class ExpressionParser implements TripleParser {
         }
     }
 
-    private static class TokenVal {
-        public final Token token;
-        public final String value;
-        public final int rightBound;
-
-        public TokenVal(final Token token, final String value, final int rightBound) {
-            this.token = token;
-            this.value = value;
-            this.rightBound = rightBound;
-        }
+    private record TokenVal(Token token, String value, int rightBound) {
     }
 
     @Override
-    public TripleExpression parse(String expression) {
-        // System.err.println(expression);
-        TripleExpression ans = Objects.requireNonNull(parse(expression, 0, -1)).expression;
-        // System.err.println("ANS :::: " + ans.toMiniString());
-        return ans;
+    public TripleExpression parse(final String expression) {
+        return Objects.requireNonNull(parse(expression, 0, -1)).expression;
     }
 
-    static class ParsePart {
-        public final MaxExpression expression;
-        public final int rBound;
-
-        public ParsePart(MaxExpression expression, int rBound) {
-            this.expression = expression;
-            this.rBound = rBound;
-        }
-
+    record ParsePart(MaxExpression expression, int rBound) {
         @Override
         public String toString() {
             return expression.toMiniString() + "(" + rBound + ")";
         }
     }
 
-    private TokenVal nextToken(String expression, int leftBound, boolean unaryAble) {
+    private TokenVal nextToken(final String expression, final int leftBound, final boolean unaryAble) {
         for (int i = leftBound; i < expression.length(); i++) {
             char c = expression.charAt(i);
             if (Character.isWhitespace(c)) {
@@ -160,39 +155,34 @@ public class ExpressionParser implements TripleParser {
         return null;
     }
 
-    private int IND = 0;
-
     private ParsePart parse(final String expression, int leftBound, final int minPriority) {
-        int ind = IND++;
-        // System.err.println(minPriority + " | " + leftBound +
-        //         " = " + expression.substring(leftBound) + "(" + ind + ")");
         ParsePart prevPart = null;
         while (true) {
-            // System.err.println("LOL");
             TokenVal tokenVal = nextToken(expression, leftBound, prevPart == null);
             if (tokenVal == null) {
-                // System.err.println("RETURN ||| " + leftBound + " : END");
                 if (prevPart == null) {
                     return null;
                 }
                 return new ParsePart(prevPart.expression, expression.length());
             }
-            // System.err.println("Token: " + tokenVal.value + " | " + tokenVal.rightBound + " : "
-            // + ind + " (" + prevPart + ") ");
 
             leftBound = tokenVal.rightBound + 1;
             Token token = tokenVal.token;
             switch (token) {
                 case OPEN_BRACKET:
                     ParsePart inBracket = parse(expression, tokenVal.rightBound + 1, -1);
-                    prevPart = new ParsePart(inBracket.expression, inBracket.rBound + 1);
-                    leftBound = prevPart.rBound + 1;
+                    if (inBracket == null) {
+                        prevPart = null;
+                    } else {
+                        prevPart = new ParsePart(inBracket.expression, inBracket.rBound + 1);
+                        leftBound = prevPart.rBound + 1;
+                    }
                     continue;
                 case CLOSE_BRACKET:
                     if (prevPart == null) {
-                        throw new WrongExpressionException();
+                        throw new WrongExpressionException(String.format("Wrong close bracket (%d)",
+                                tokenVal.rightBound));
                     }
-                    // System.err.println("RETURN ||| " + "BRACKET " + leftBound);
                     return new ParsePart(prevPart.expression, tokenVal.rightBound - 1);
                 case VARIABLE:
                     prevPart = new ParsePart(new Variable(tokenVal.value), tokenVal.rightBound);
@@ -205,8 +195,6 @@ public class ExpressionParser implements TripleParser {
 
             final Operation operation = getOperation(token, prevPart);
             if (operation.priority < minPriority) {
-                // System.err.println("RETURN ||| " + operation + " : " + tokenVal.value + " : " + tokenVal.rightBound
-                //         + " : " + tokenVal.token + " : " + leftBound);
                 return prevPart;
             }
             ParsePart nextPart = null;
@@ -219,44 +207,73 @@ public class ExpressionParser implements TripleParser {
             }
             switch (operation) {
                 case Add:
+                    if (prevPart == null || nextPart == null) {
+                        throw new WrongExpressionException(String.format("%s (%d)", operation,
+                                tokenVal.rightBound));
+                    }
                     prevPart = new ParsePart(new Add(prevPart.expression, nextPart.expression),
                             nextPart.rBound);
                     break;
                 case Subtract:
+                    if (prevPart == null || nextPart == null) {
+                        throw new WrongExpressionException(String.format("%s (%d)", operation,
+                                tokenVal.rightBound));
+                    }
                     prevPart = new ParsePart(new Subtract(prevPart.expression, nextPart.expression),
                             nextPart.rBound);
                     break;
                 case Multiply:
+                    if (prevPart == null || nextPart == null) {
+                        throw new WrongExpressionException(String.format("%s (%d)", operation,
+                                tokenVal.rightBound));
+                    }
                     prevPart = new ParsePart(new Multiply(prevPart.expression, nextPart.expression),
                             nextPart.rBound);
                     break;
                 case Divide:
+                    if (prevPart == null || nextPart == null) {
+                        throw new WrongExpressionException(String.format("%s (%d)", operation,
+                                tokenVal.rightBound));
+                    }
                     prevPart = new ParsePart(new Divide(prevPart.expression, nextPart.expression),
                             nextPart.rBound);
                     break;
                 case Pow:
+                    if (prevPart == null || nextPart == null) {
+                        throw new WrongExpressionException(String.format("%s (%d)", operation,
+                                tokenVal.rightBound));
+                    }
                     prevPart = new ParsePart(new Pow(prevPart.expression, nextPart.expression),
                             nextPart.rBound);
                     break;
                 case Log:
+                    if (prevPart == null || nextPart == null) {
+                        throw new WrongExpressionException(String.format("%s (%d)", operation,
+                                tokenVal.rightBound));
+                    }
                     prevPart = new ParsePart(new Log(prevPart.expression, nextPart.expression),
                             nextPart.rBound);
                     break;
                 case Minus:
                     nextPart = parse(expression, tokenVal.rightBound + 1,
                             operation.priority);
-                    prevPart = new ParsePart(new UnaryMinus(nextPart.expression),
+                    if (nextPart == null) {
+                        throw new WrongExpressionException(String.format("%s (%d)", operation,
+                                tokenVal.rightBound));
+                    }
+                    prevPart = new ParsePart(new Negative(nextPart.expression),
                             nextPart.rBound);
                     leftBound = nextPart.rBound + 1;
                     break;
                 case Factorial:
                     if (prevPart == null) {
-                        throw new WrongExpressionException();
+                        throw new WrongExpressionException(String.format("%s (%d)", operation,
+                                tokenVal.rightBound));
                     }
                     prevPart = new ParsePart(new Factorial(prevPart.expression), tokenVal.rightBound);
                     break;
                 default:
-                    throw new WrongExpressionException();
+                    throw new WrongExpressionException("Unknown operation: " + operation);
             }
         }
     }
@@ -275,7 +292,6 @@ public class ExpressionParser implements TripleParser {
             }
             operation = op;
         }
-        // System.err.println("OP> " + operation);
         if (operation == null) {
             throw new WrongExpressionException();
         }
