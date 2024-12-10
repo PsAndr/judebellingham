@@ -33,9 +33,8 @@ public class Variable implements SimpleExpression, SimpleRightExpression {
 
     @Override
     public float evaluateF(final Map<String, Float> variables) {
-        String id = getNameId();
-        if (variables.containsKey(id)) {
-            return variables.get(id);
+        if (variables.containsKey(name)) {
+            return variables.get(name);
         }
         throw new RuntimeException("Variable " + name + " not found");
     }
