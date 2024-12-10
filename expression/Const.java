@@ -2,7 +2,7 @@ package expression;
 
 import java.util.Map;
 
-public class Const implements SimpleExpression, SimpleRightExpression {
+public class Const implements MaxExpression {
     private final double value;
 
     private final boolean real;

@@ -2,7 +2,7 @@ package expression;
 
 import java.util.Map;
 
-public class Variable implements SimpleExpression, SimpleRightExpression {
+public class Variable implements MaxExpression {
     private final String name;
 
     public Variable(final String name) {
