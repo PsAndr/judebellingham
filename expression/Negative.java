@@ -3,7 +3,7 @@ package expression;
 import java.util.Map;
 
 public class Negative extends UnaryExpression {
-    public Negative(final MaxExpression expression) {
+    public Negative(final AllExpression expression) {
         super(expression);
     }
 

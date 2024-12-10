@@ -109,7 +109,7 @@ public class ExpressionParser implements TripleParser {
         return ans.expression;
     }
 
-    record ParsePart(MaxExpression expression, int rBound) {
+    record ParsePart(AllExpression expression, int rBound) {
         @Override
         public String toString() {
             return expression.toMiniString() + "(" + rBound + ")";

@@ -1,7 +1,7 @@
 package expression;
 
 public class Subtract extends BinaryExpression {
-    public Subtract(final MaxExpression left, final MaxExpression right) {
+    public Subtract(final AllExpression left, final AllExpression right) {
         super(left, right);
     }
 

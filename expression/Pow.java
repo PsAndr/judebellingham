@@ -1,7 +1,7 @@
 package expression;
 
 public class Pow extends BinaryExpression {
-    public Pow(final MaxExpression left, final MaxExpression right) {
+    public Pow(final AllExpression left, final AllExpression right) {
         super(left, right);
     }
 

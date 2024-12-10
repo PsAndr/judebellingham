@@ -1,10 +1,10 @@
 package expression.exceptions;
 
 import expression.Negative;
-import expression.MaxExpression;
+import expression.AllExpression;
 
 public class CheckedNegate extends Negative {
-    public CheckedNegate(final MaxExpression expression) {
+    public CheckedNegate(final AllExpression expression) {
         super(expression);
     }
 

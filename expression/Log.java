@@ -1,7 +1,7 @@
 package expression;
 
 public class Log extends BinaryExpression {
-    public Log(final MaxExpression left, final MaxExpression right) {
+    public Log(final AllExpression left, final AllExpression right) {
         super(left, right);
     }
 

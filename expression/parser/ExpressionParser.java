@@ -11,14 +11,6 @@ public class ExpressionParser implements TripleParser {
             super(message);
         }
 
-        public WrongExpressionException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public WrongExpressionException(Throwable cause) {
-            super(cause);
-        }
-
         public WrongExpressionException() {
             super();
         }
@@ -81,7 +73,7 @@ public class ExpressionParser implements TripleParser {
         return Objects.requireNonNull(parse(expression, 0, -1)).expression;
     }
 
-    record ParsePart(MaxExpression expression, int rBound) {
+    record ParsePart(AllExpression expression, int rBound) {
         @Override
         public String toString() {
             return expression.toMiniString() + "(" + rBound + ")";
@@ -189,7 +181,7 @@ public class ExpressionParser implements TripleParser {
                     continue;
                 case CONST:
                     prevPart = new ParsePart(new Const(
-                            (int)(Long.parseLong(tokenVal.value))), tokenVal.rightBound);
+                            Integer.parseInt(tokenVal.value)), tokenVal.rightBound);
                     continue;
             }
 

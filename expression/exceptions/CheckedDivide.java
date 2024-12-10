@@ -1,10 +1,10 @@
 package expression.exceptions;
 
 import expression.Divide;
-import expression.MaxExpression;
+import expression.AllExpression;
 
 public class CheckedDivide extends Divide {
-    public CheckedDivide(final MaxExpression left, final MaxExpression right) {
+    public CheckedDivide(final AllExpression left, final AllExpression right) {
         super(left, right);
     }
 

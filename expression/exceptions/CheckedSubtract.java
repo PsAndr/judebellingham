@@ -1,10 +1,10 @@
 package expression.exceptions;
 
-import expression.MaxExpression;
+import expression.AllExpression;
 import expression.Subtract;
 
 public class CheckedSubtract extends Subtract {
-    public CheckedSubtract(final MaxExpression left, final MaxExpression right) {
+    public CheckedSubtract(final AllExpression left, final AllExpression right) {
         super(left, right);
     }
 

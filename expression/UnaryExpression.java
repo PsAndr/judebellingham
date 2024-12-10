@@ -2,10 +2,10 @@ package expression;
 
 import java.util.Objects;
 
-public abstract class UnaryExpression implements MaxExpression {
-    protected final MaxExpression expression;
+public abstract class UnaryExpression implements AllExpression {
+    protected final AllExpression expression;
 
-    public UnaryExpression(final MaxExpression expression) {
+    public UnaryExpression(final AllExpression expression) {
         this.expression = expression;
     }
 

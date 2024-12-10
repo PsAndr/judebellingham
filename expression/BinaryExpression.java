@@ -3,11 +3,11 @@ package expression;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class BinaryExpression implements MaxExpression {
-    protected final MaxExpression left;
-    protected final MaxExpression right;
+public abstract class BinaryExpression implements AllExpression {
+    protected final AllExpression left;
+    protected final AllExpression right;
 
-    public BinaryExpression(final MaxExpression left, final MaxExpression right) {
+    public BinaryExpression(final AllExpression left, final AllExpression right) {
         this.left = left;
         this.right = right;
     }

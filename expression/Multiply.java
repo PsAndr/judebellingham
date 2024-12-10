@@ -1,7 +1,7 @@
 package expression;
 
 public class Multiply extends BinaryExpression {
-    public Multiply(final MaxExpression left, final MaxExpression right) {
+    public Multiply(final AllExpression left, final AllExpression right) {
         super(left, right);
     }
 

@@ -3,7 +3,7 @@ package expression;
 import java.util.Map;
 
 public class Factorial extends UnaryExpression {
-    public Factorial(final MaxExpression expression) {
+    public Factorial(final AllExpression expression) {
         super(expression);
     }
 

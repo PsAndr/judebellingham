@@ -1,10 +1,10 @@
 package expression.exceptions;
 
 import expression.Add;
-import expression.MaxExpression;
+import expression.AllExpression;
 
 public class CheckedAdd extends Add {
-    public CheckedAdd(final MaxExpression left, final MaxExpression right) {
+    public CheckedAdd(final AllExpression left, final AllExpression right) {
         super(left, right);
     }
 
