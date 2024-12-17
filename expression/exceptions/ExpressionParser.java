@@ -83,54 +83,57 @@ public class ExpressionParser implements TripleParser {
             if (Character.isWhitespace(c)) {
                 continue;
             }
-            if (c != '-' || !(source.hasNext() && Character.isDigit(source.getChar())) || !unaryAble) {
-                if (c == '(') {
-                    return new TokenVal(Token.OPEN_BRACKET, "(");
+            boolean isFirstLetter = Character.isLetter(c);
+            final boolean hasMinus = c == '-';
+            StringBuilder sb = new StringBuilder().append(c);
+            if (c == '-' || isFirstLetter || Character.isDigit(c)) {
+                while (source.hasNext() && ((Character.isLetter(source.getChar()) && isFirstLetter)
+                        || Character.isDigit(source.getChar()))) {
+                    sb.append(source.nextChar());
                 }
-                if (c == ')') {
-                    return new TokenVal(Token.CLOSE_BRACKET, ")");
+                if ((!hasMinus || sb.length() > 1) && !isFirstLetter && unaryAble) {
+                    return new TokenVal(Token.CONST, sb.toString());
                 }
-                Token ans = null;
-                String op = "";
-                for (Token token : Token.values()) {
-                    if (token.operations.isEmpty()) {
+                if (!isFirstLetter) {
+                    source.setStart(source.getStart() - sb.length() + 1);
+                    sb = new StringBuilder().append(c);
+                }
+            }
+            if (c == '(') {
+                return new TokenVal(Token.OPEN_BRACKET, "(");
+            }
+            if (c == ')') {
+                return new TokenVal(Token.CLOSE_BRACKET, ")");
+            }
+            Token ans = null;
+            String op = "";
+            for (Token token : Token.values()) {
+                if (token.operations.isEmpty()) {
+                    continue;
+                }
+                for (Operation operation : token.operations) {
+                    if (operation.isUnary && !operation.isRight && !unaryAble) {
                         continue;
                     }
-                    for (Operation operation : token.operations) {
-                        if (operation.isUnary && !operation.isRight && !unaryAble) {
-                            continue;
-                        }
-                        if (operation.stringVal.startsWith(String.valueOf(c))) {
-                            if (source.startsWith(operation.stringVal.substring(1))) {
-                                if (ans == null || op.length() < operation.stringVal.length()) {
-                                    ans = token;
-                                    op = operation.stringVal;
-                                }
+                    if (!operation.isUnary && unaryAble) {
+                        continue;
+                    }
+                    if (operation.stringVal.startsWith(sb.toString())) {
+                        if (source.startsWith(operation.stringVal.substring(sb.length()))) {
+                            if (ans == null || op.length() < operation.stringVal.length()) {
+                                ans = token;
+                                op = operation.stringVal;
                             }
                         }
                     }
                 }
-                if (ans != null) {
-                    source.setStart(source.getStart() + op.length() - 1);
-                    return new TokenVal(ans, op);
-                }
             }
-            if (c == '-' || Character.isLetter(c) || Character.isDigit(c)) {
-                final boolean hasMinus = c == '-';
-                boolean hasLetter = Character.isLetter(c);
-                StringBuilder sb = new StringBuilder().append(c);
-                while (source.hasNext() && (Character.isLetter(source.getChar())
-                        || Character.isDigit(source.getChar()))) {
-                    if (Character.isLetter(source.getChar())) {
-                        hasLetter = true;
-                    }
-                    sb.append(source.nextChar());
-                }
-                if (hasLetter && !hasMinus) {
-                    return new TokenVal(Token.VARIABLE, sb.toString());
-                } else if (!hasLetter) {
-                    return new TokenVal(Token.CONST, sb.toString());
-                }
+            if (ans != null) {
+                source.setStart(source.getStart() + op.length() - sb.length());
+                return new TokenVal(ans, op);
+            }
+            if (isFirstLetter && !hasMinus) {
+                return new TokenVal(Token.VARIABLE, sb.toString());
             }
             throw new TokenException("Unexpected token: " + c + source.toString(4), source.getStart());
         }
@@ -161,7 +164,8 @@ public class ExpressionParser implements TripleParser {
                     return prevPart;
                 case VARIABLE:
                     if (prevPart != null) {
-                        throw new IncorrectVariableException("Unexpected variable", source.getStart());
+                        throw new IncorrectVariableException("Unexpected variable: " + tokenVal.value,
+                                source.getStart());
                     }
                     if (tokenVal.value.isEmpty()
                             || !enableVariablesEnds.contains(tokenVal.value.substring(
@@ -190,7 +194,7 @@ public class ExpressionParser implements TripleParser {
                 source.setStart(startBeforeToken);
                 return prevPart;
             }
-            AllExpression nextPart = null;
+            AllExpression nextPart;
 
             if (!operation.isUnary) {
                 nextPart = parse(source, operation.priority + 1);
