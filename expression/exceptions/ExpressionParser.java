@@ -1,48 +1,11 @@
 package expression.exceptions;
 
 import expression.*;
-import expression.parser.TripleParser;
 
 import java.util.List;
 import java.util.Set;
 
 public class ExpressionParser implements TripleParser {
-    public static class WrongExpressionException extends RuntimeException {
-        public WrongExpressionException(String message) {
-            super(message);
-        }
-    }
-
-    public static class TokenException extends WrongExpressionException {
-        public TokenException(String message) {
-            super(message);
-        }
-    }
-
-    public static class OperationException extends WrongExpressionException {
-        public OperationException(String message) {
-            super(message);
-        }
-    }
-
-    public static class ConstantParseException extends WrongExpressionException {
-        public ConstantParseException(String message) {
-            super(message);
-        }
-    }
-
-    public static class IncorrectVariableException extends WrongExpressionException {
-        public IncorrectVariableException(String message) {
-            super(message);
-        }
-    }
-
-    public static class BracketParseException extends WrongExpressionException {
-        public BracketParseException(String message) {
-            super(message);
-        }
-    }
-
     private final Set<String> enableVariables = Set.of(
             "x", "y", "z"
     );
@@ -55,7 +18,10 @@ public class ExpressionParser implements TripleParser {
         Pow(4, "**", false),
         Log(4, "//", false),
         Factorial(6, "!", true, true),
+        LeftFactorial(7, "!", true),
         Minus(7, "-", true),
+        GCD(0, "gcd", false),
+        LCM(0, "lcm", false),
         ;
 
         public final int priority;
@@ -81,8 +47,10 @@ public class ExpressionParser implements TripleParser {
         DIVIDE(List.of(Operation.Divide)),
         POW(List.of(Operation.Pow)),
         LOG(List.of(Operation.Log)),
-        FACTORIAL(List.of(Operation.Factorial)),
+        FACTORIAL(List.of(Operation.Factorial, Operation.LeftFactorial)),
         MINUS(List.of(Operation.Minus, Operation.Subtract)),
+        GCD(List.of(Operation.GCD)),
+        LCM(List.of(Operation.LCM)),
 
         CONST(List.of()),
         VARIABLE(List.of()),
@@ -96,56 +64,39 @@ public class ExpressionParser implements TripleParser {
         }
     }
 
-    private record TokenVal(Token token, String value, int rightBound) {
+    private record TokenVal(Token token, String value) {
     }
 
     @Override
     public TripleExpression parse(final String expression) {
-        ParsePart ans = parse(expression, 0, -1);
-        if (ans == null || ans.rBound < expression.length() - 1) {
-            throw new WrongExpressionException("Unknown error while parse: " +
-                    "parse only part of expression");
+        CharSource source = new CharSource(expression);
+        TripleExpression ans = parse(source, -1);
+        if (source.hasNext()) {
+            throw new WrongExpressionException("Unexpected end expression", source.getStart());
         }
-        return ans.expression;
+        return ans;
     }
 
-    record ParsePart(AllExpression expression, int rBound) {
-        @Override
-        public String toString() {
-            return expression.toMiniString() + "(" + rBound + ")";
-        }
-    }
-
-    private TokenVal nextToken(final String expression, final int leftBound, final boolean unaryAble) {
-        for (int i = leftBound; i < expression.length(); i++) {
-            char c = expression.charAt(i);
+    private TokenVal nextToken(final CharSource source, final boolean unaryAble) {
+        while (source.hasNext()) {
+            char c = source.nextChar();
             if (Character.isWhitespace(c)) {
                 continue;
             }
             if (Character.isDigit(c) ||
-                    (c == '-' && i + 1 < expression.length() && Character.isDigit(expression.charAt(i + 1))
-                    && unaryAble)) {
-                int j = i + 1;
+                    (c == '-' && source.hasNext() && Character.isDigit(source.getChar())
+                            && unaryAble)) {
                 StringBuilder sb = new StringBuilder().append(c);
-                while (j < expression.length() && Character.isDigit(expression.charAt(j))) {
-                    sb.append(expression.charAt(j++));
+                while (source.hasNext() && Character.isDigit(source.getChar())) {
+                    sb.append(source.nextChar());
                 }
-                return new TokenVal(Token.CONST, sb.toString(), j - 1);
+                return new TokenVal(Token.CONST, sb.toString());
             }
             if (c == '(') {
-                return new TokenVal(Token.OPEN_BRACKET, "(", i);
+                return new TokenVal(Token.OPEN_BRACKET, "(");
             }
             if (c == ')') {
-                return new TokenVal(Token.CLOSE_BRACKET, ")", i);
-            }
-            if (Character.isLetter(c)) {
-                int j = i;
-                StringBuilder sb = new StringBuilder();
-                while (j < expression.length() && Character.isLetter(expression.charAt(j))) {
-                    sb.append(expression.charAt(j++));
-                }
-                j--;
-                return new TokenVal(Token.VARIABLE, sb.toString(), j);
+                return new TokenVal(Token.CLOSE_BRACKET, ")");
             }
             Token ans = null;
             String op = "";
@@ -158,18 +109,7 @@ public class ExpressionParser implements TripleParser {
                         continue;
                     }
                     if (operation.stringVal.startsWith(String.valueOf(c))) {
-                        boolean flag = true;
-                        for (int j = 0; j < operation.stringVal.length(); j++) {
-                            if (i + j >= expression.length()) {
-                                flag = false;
-                                break;
-                            }
-                            if (expression.charAt(i + j) != operation.stringVal.charAt(j)) {
-                                flag = false;
-                                break;
-                            }
-                        }
-                        if (flag) {
+                        if (source.startsWith(operation.stringVal.substring(1))) {
                             if (ans == null || op.length() < operation.stringVal.length()) {
                                 ans = token;
                                 op = operation.stringVal;
@@ -178,155 +118,132 @@ public class ExpressionParser implements TripleParser {
                     }
                 }
             }
-            return new TokenVal(ans, op, i + op.length() - 1);
+            if (ans != null) {
+                source.setStart(source.getStart() + op.length() - 1);
+                return new TokenVal(ans, op);
+            }
+            if (Character.isLetter(c)) {
+                StringBuilder sb = new StringBuilder().append(c);
+                while (source.hasNext() && Character.isLetter(source.getChar())) {
+                    sb.append(source.nextChar());
+                }
+                return new TokenVal(Token.VARIABLE, sb.toString());
+            }
+            throw new TokenException("Unexpected token: " + c + source.toString(4), source.getStart());
         }
         return null;
     }
 
-    private ParsePart parse(final String expression, int leftBound, final int minPriority) {
-        ParsePart prevPart = null;
+    private AllExpression parse(final CharSource source, final int minPriority) {
+        AllExpression prevPart = null;
         while (true) {
-            TokenVal tokenVal = nextToken(expression, leftBound, prevPart == null);
+            int startBeforeToken = source.getStart();
+            TokenVal tokenVal = nextToken(source, prevPart == null);
             if (tokenVal == null) {
-                if (prevPart == null) {
-                    return null;
-                }
-                return new ParsePart(prevPart.expression, expression.length());
+                return prevPart;
             }
 
-            leftBound = tokenVal.rightBound + 1;
             Token token = tokenVal.token;
-            if (token == null) {
-                throw new TokenException("Unexpected token: null (" + leftBound + ")");
-            }
             switch (token) {
                 case OPEN_BRACKET:
-                    ParsePart inBracket = parse(expression, tokenVal.rightBound + 1, -1);
-                    if (inBracket == null || inBracket.rBound + 1 >= expression.length()
-                            || expression.charAt(inBracket.rBound + 1) != ')') {
-                        throw new BracketParseException("Don`t find close bracket");
-                    } else {
-                        prevPart = new ParsePart(inBracket.expression, inBracket.rBound + 1);
-                        leftBound = prevPart.rBound + 1;
+                    prevPart = parse(source, -1);
+                    if (!source.hasNext() || source.nextChar() != ')') {
+                        throw new BracketParseException("No close bracket", source.getStart());
                     }
                     continue;
                 case CLOSE_BRACKET:
                     if (prevPart == null) {
-                        throw new BracketParseException(String.format("Wrong close bracket (%d)",
-                                tokenVal.rightBound));
+                        throw new BracketParseException("Wrong close bracket", source.getStart());
                     }
-                    return new ParsePart(prevPart.expression, tokenVal.rightBound - 1);
+                    source.setStart(source.getStart() - 1);
+                    return prevPart;
                 case VARIABLE:
-                    if (!enableVariables.contains(tokenVal.value.substring(tokenVal.value.length() - 1))) {
-                        throw new IncorrectVariableException("Wrong variable name: " + tokenVal.value);
+                    if (prevPart != null) {
+                        throw new IncorrectVariableException("Unexpected variable", source.getStart());
                     }
-                    prevPart = new ParsePart(new Variable(tokenVal.value), tokenVal.rightBound);
+                    if (tokenVal.value.isEmpty()
+                            || !enableVariables.contains(tokenVal.value.substring(
+                                    tokenVal.value.length() - 1))) {
+                        throw new IncorrectVariableException("Wrong variable name: " + tokenVal.value,
+                                source.getStart());
+                    }
+                    prevPart = new Variable(tokenVal.value);
                     continue;
                 case CONST:
                     if (prevPart != null) {
-                        throw new ConstantParseException("Unexpected constant value: " + tokenVal.value
-                                + "(" + tokenVal.rightBound + ")");
+                        throw new IncorrectVariableException("Unexpected const value: " + tokenVal.value
+                                + "(" + prevPart + ")", source.getStart());
                     }
                     try {
-                        prevPart = new ParsePart(new Const(
-                                Integer.parseInt(tokenVal.value)), tokenVal.rightBound);
+                        prevPart = new Const(Integer.parseInt(tokenVal.value));
                     } catch (NumberFormatException e) {
-                        throw new WrongExpressionException("Wrong constant value: " + tokenVal.value);
+                        throw new ConstantParseException("Wrong const value: " + tokenVal.value, source.getStart());
                     }
                     continue;
             }
 
-            final Operation operation = getOperation(token, prevPart);
+            final Operation operation = getOperation(token, prevPart, source);
+
             if (operation.priority < minPriority) {
+                source.setStart(startBeforeToken);
                 return prevPart;
             }
-            ParsePart nextPart = null;
+            AllExpression nextPart = null;
+
             if (!operation.isUnary) {
-                nextPart = parse(expression, tokenVal.rightBound + 1, operation.priority + 1);
-                if (nextPart == null) {
-                    throw new OperationException("Don`t find right part for binary expression: " + operation
-                            + "(" + tokenVal.rightBound + ")");
-                }
-                if (prevPart == null) {
-                    throw new OperationException("Don`t find left part for binary expression: " + operation
-                            + "(" + tokenVal.rightBound + ")");
-                }
-                leftBound = nextPart.rBound + 1;
-            }
-            switch (operation) {
-                case Add:
-                    if (prevPart == null || nextPart == null) {
-                        throw new OperationException(String.format("%s (%d)", operation,
-                                tokenVal.rightBound));
-                    }
-                    prevPart = new ParsePart(new CheckedAdd(prevPart.expression, nextPart.expression),
-                            nextPart.rBound);
-                    break;
-                case Subtract:
-                    if (prevPart == null || nextPart == null) {
-                        throw new OperationException(String.format("%s (%d)", operation,
-                                tokenVal.rightBound));
-                    }
-                    prevPart = new ParsePart(new CheckedSubtract(prevPart.expression, nextPart.expression),
-                            nextPart.rBound);
-                    break;
-                case Multiply:
-                    if (prevPart == null || nextPart == null) {
-                        throw new OperationException(String.format("%s (%d)", operation,
-                                tokenVal.rightBound));
-                    }
-                    prevPart = new ParsePart(new CheckedMultiply(prevPart.expression, nextPart.expression),
-                            nextPart.rBound);
-                    break;
-                case Divide:
-                    if (prevPart == null || nextPart == null) {
-                        throw new OperationException(String.format("%s (%d)", operation,
-                                tokenVal.rightBound));
-                    }
-                    prevPart = new ParsePart(new CheckedDivide(prevPart.expression, nextPart.expression),
-                            nextPart.rBound);
-                    break;
-                case Pow:
-                    if (prevPart == null || nextPart == null) {
-                        throw new OperationException(String.format("%s (%d)", operation,
-                                tokenVal.rightBound));
-                    }
-                    prevPart = new ParsePart(new Pow(prevPart.expression, nextPart.expression),
-                            nextPart.rBound);
-                    break;
-                case Log:
-                    if (prevPart == null || nextPart == null) {
-                        throw new OperationException(String.format("%s (%d)", operation,
-                                tokenVal.rightBound));
-                    }
-                    prevPart = new ParsePart(new Log(prevPart.expression, nextPart.expression),
-                            nextPart.rBound);
-                    break;
-                case Minus:
-                    nextPart = parse(expression, tokenVal.rightBound + 1,
-                            operation.priority);
-                    if (nextPart == null) {
-                        throw new OperationException(String.format("%s (%d)", operation,
-                                tokenVal.rightBound));
-                    }
-                    prevPart = new ParsePart(new CheckedNegate(nextPart.expression),
-                            nextPart.rBound);
-                    leftBound = nextPart.rBound + 1;
-                    break;
-                case Factorial:
-                    if (prevPart == null) {
-                        throw new OperationException(String.format("%s (%d)", operation,
-                                tokenVal.rightBound));
-                    }
-                    prevPart = new ParsePart(new Factorial(prevPart.expression), tokenVal.rightBound);
-                    break;
-                default:
-                    throw new OperationException("Unknown operation: " + operation);
+                nextPart = parse(source, operation.priority + 1);
+                prevPart = makeBinOperation(operation, prevPart, nextPart, source);
+            } else if (operation.isRight) {
+                prevPart = makeRightUnaryOperation(operation, prevPart, source);
+            } else {
+                nextPart = parse(source, operation.priority);
+                prevPart = makeLeftUnaryOperation(operation, nextPart, source);
             }
         }
     }
 
-    private static Operation getOperation(Token token, ParsePart prevPart) {
+    private static AllExpression makeBinOperation(final Operation op, final AllExpression l, final AllExpression r,
+                                                  final CharSource source) {
+        if (l == null || r == null) {
+            throw new OperationException(op + ": wrong left or right operands", source.getStart());
+        }
+        return switch (op) {
+            case Add -> new CheckedAdd(l, r);
+            case Subtract -> new CheckedSubtract(l, r);
+            case Pow -> new Pow(l, r);
+            case Multiply -> new CheckedMultiply(l, r);
+            case Divide -> new CheckedDivide(l, r);
+            case Log -> new Log(l, r);
+            case GCD -> new Gcd(l, r);
+            case LCM -> new Lcm(l, r);
+            default -> throw new OperationException("Unknown bin operation: " + op, source.getStart());
+        };
+    }
+
+    private static AllExpression makeLeftUnaryOperation(final Operation op, final AllExpression r,
+                                                        final CharSource source) {
+        if (r == null) {
+            throw new OperationException(op + ": wrong right operand", source.getStart());
+        }
+        return switch (op) {
+            case Minus -> new CheckedNegate(r);
+            case LeftFactorial -> new LeftFactorial(r);
+            default -> throw new OperationException("Unknown left unary operation: " + op, source.getStart());
+        };
+    }
+
+    private static AllExpression makeRightUnaryOperation(final Operation op, final AllExpression l,
+                                                         final CharSource source) {
+        if (l == null) {
+            throw new OperationException(op + ": wrong left operand", source.getStart());
+        }
+        return switch (op) {
+            case Factorial -> new Factorial(l);
+            default -> throw new OperationException("Unknown right unary operation: " + op, source.getStart());
+        };
+    }
+
+    private static Operation getOperation(final Token token, final AllExpression prevPart, final CharSource source) {
         Operation operation = null;
         for (Operation op : token.operations) {
             if (!op.isUnary && prevPart == null) {
@@ -341,7 +258,7 @@ public class ExpressionParser implements TripleParser {
             operation = op;
         }
         if (operation == null) {
-            throw new OperationException("Don`t find optimal operation for: " + token + "(" + prevPart + ")");
+            throw new OperationException("Operation unexpected (null)", source.getStart());
         }
         return operation;
     }

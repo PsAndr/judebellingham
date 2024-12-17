@@ -9,11 +9,10 @@ public class CheckedNegate extends Negative {
     }
 
     @Override
-    public int evaluate(int x, int y, int z) {
-        int exprAns = expression.evaluate(x, y, z);
-        if (exprAns == Integer.MIN_VALUE) {
+    protected int getOperationResult(int val) {
+        if (val == Integer.MIN_VALUE) {
             throw new ArithmeticException("overflow");
         }
-        return -exprAns;
+        return -val;
     }
 }

@@ -10,7 +10,23 @@ public abstract class UnaryExpression implements AllExpression {
     }
 
     protected abstract boolean isRight();
+    protected boolean canNearPlaceConst() {
+        return true;
+    }
+
     protected abstract String getSign();
+
+    protected abstract int getOperationResult(int val);
+
+    @Override
+    public int evaluate(int x, int y, int z) {
+        return getOperationResult(expression.evaluate(x, y, z));
+    }
+
+    @Override
+    public int evaluate(int x) {
+        return getOperationResult(expression.evaluate(x));
+    }
 
     @Override
     public String toMiniString() {
@@ -21,10 +37,11 @@ public abstract class UnaryExpression implements AllExpression {
         } else {
             ans = expression.toMiniString();
         }
+        String splitSigns = flag || canNearPlaceConst() ? "" : " ";
         if (isRight()) {
-            ans += getSign();
+            ans += splitSigns + getSign();
         } else {
-            ans = getSign() + (flag ? "" : " ") + ans;
+            ans = getSign() + splitSigns + ans;
         }
         return ans;
     }

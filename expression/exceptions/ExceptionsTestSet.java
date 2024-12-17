@@ -66,8 +66,7 @@ public class ExceptionsTestSet<E extends ToMiniString, C> extends ParserTestSet<
                 final long expected = f.applyAsLong(a, b);
                 try {
                     final int actual = expression.evaluate(a, b, 0);
-                    counter.checkTrue(actual == expected, "%d %s %d == %d (%d)", a, op, b, actual,
-                            expected);
+                    counter.checkTrue(actual == expected, "%d %s %d == %d", a, op, b, actual);
                 } catch (final Exception e) {
                     if (Integer.MIN_VALUE <= expected && expected <= Integer.MAX_VALUE) {
                         counter.fail(e, "Unexpected error in %d %s %d", a, op, b);

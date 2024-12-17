@@ -2,8 +2,8 @@ package expression;
 
 import java.util.Map;
 
-public class Negative extends UnaryExpression {
-    public Negative(final AllExpression expression) {
+public class LeftFactorial extends UnaryExpression {
+    public LeftFactorial(final AllExpression expression) {
         super(expression);
     }
 
@@ -14,12 +14,18 @@ public class Negative extends UnaryExpression {
 
     @Override
     protected String getSign() {
-        return "-";
+        return "!";
     }
 
     @Override
     protected int getOperationResult(int val) {
-        return -val;
+        int ans = 1;
+        for (int i = 1;; i++) {
+            if (ans > val / i) {
+                return i - 1;
+            }
+            ans *= i;
+        }
     }
 
     @Override
@@ -30,10 +36,5 @@ public class Negative extends UnaryExpression {
     @Override
     public int getPriority() {
         return 10;
-    }
-
-    @Override
-    protected boolean canNearPlaceConst() {
-        return false;
     }
 }

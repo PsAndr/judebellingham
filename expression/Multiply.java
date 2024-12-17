@@ -24,9 +24,4 @@ public class Multiply extends BinaryExpression {
     public int getPriority() {
         return 2;
     }
-
-    @Override
-    public boolean isChangeOperation() {
-        return true;
-    }
 }

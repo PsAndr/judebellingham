@@ -29,4 +29,9 @@ public class Divide extends BinaryExpression {
     public boolean isPriorityOperation() {
         return true;
     }
+
+    @Override
+    public boolean isChangeOperation() {
+        return true;
+    }
 }

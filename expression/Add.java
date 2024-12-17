@@ -24,9 +24,4 @@ public class Add extends BinaryExpression {
     public int getPriority() {
         return 1;
     }
-
-    @Override
-    public boolean isChangeOperation() {
-        return true;
-    }
 }

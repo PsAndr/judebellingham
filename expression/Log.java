@@ -18,16 +18,12 @@ public class Log extends BinaryExpression {
         if (a == 0 && b != 0) {
             return Integer.MIN_VALUE;
         }
-        if (a == 0) {
-            return 0;
-        }
-        if (b == 0) {
+        if (a == 0 || b == 0)  {
             return 0;
         }
         if (b == 1 && a > 1) {
             return Integer.MAX_VALUE;
         }
-        // System.err.println("LOG: " + a + " | " + b);
         int ans = 0;
         long mul = 1;
         while (mul < a) {
@@ -50,5 +46,10 @@ public class Log extends BinaryExpression {
     @Override
     public boolean isPriorityOperation() {
         return true;
+    }
+
+    @Override
+    protected boolean isAssociative() {
+        return false;
     }
 }

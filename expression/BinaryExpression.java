@@ -16,6 +16,10 @@ public abstract class BinaryExpression implements AllExpression {
     protected abstract int getOperationResult(final int a, final int b);
     protected abstract float getOperationResult(final float a, final float b);
 
+    protected boolean isAssociative() {
+        return !isChangeOperation();
+    }
+
     @Override
     public int evaluate(final int x) {
         return getOperationResult(left.evaluate(x), right.evaluate(x));
@@ -63,7 +67,8 @@ public abstract class BinaryExpression implements AllExpression {
         }
         sb.append(" ").append(getSign()).append(" ");
         flag = right.getPriority() < getPriority() || (right.getPriority() == getPriority()
-                && (!isChangeOperation() || right.isPriorityOperation()));
+                && (isChangeOperation() || right.isPriorityOperation())
+                && (!isAssociative() || getClass() != right.getClass()));
         if (flag) {
             sb.append("(");
         }

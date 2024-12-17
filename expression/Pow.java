@@ -37,4 +37,9 @@ public class Pow extends BinaryExpression {
     public boolean isPriorityOperation() {
         return true;
     }
+
+    @Override
+    protected boolean isAssociative() {
+        return false;
+    }
 }

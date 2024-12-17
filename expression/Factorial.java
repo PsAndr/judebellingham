@@ -18,8 +18,8 @@ public class Factorial extends UnaryExpression {
     }
 
     @Override
-    public int evaluate(final int x) {
-        return fact(expression.evaluate(x));
+    protected int getOperationResult(int val) {
+        return fact(val);
     }
 
     private int fact(int n) {
@@ -40,11 +40,6 @@ public class Factorial extends UnaryExpression {
     @Override
     public float evaluateF(final Map<String, Float> variables) {
         throw new ArithmeticException();
-    }
-
-    @Override
-    public int evaluate(final int x, final int y, final int z) {
-        return fact(expression.evaluate(x, y, z));
     }
 
     @Override
