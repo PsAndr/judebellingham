@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 public class ExpressionParser implements TripleParser {
-    private final Set<String> enableVariables = Set.of(
+    private final Set<String> enableVariablesEnds = Set.of(
             "x", "y", "z"
     );
 
@@ -83,51 +83,54 @@ public class ExpressionParser implements TripleParser {
             if (Character.isWhitespace(c)) {
                 continue;
             }
-            if (Character.isDigit(c) ||
-                    (c == '-' && source.hasNext() && Character.isDigit(source.getChar())
-                            && unaryAble)) {
-                StringBuilder sb = new StringBuilder().append(c);
-                while (source.hasNext() && Character.isDigit(source.getChar())) {
-                    sb.append(source.nextChar());
+            if (c != '-' || !(source.hasNext() && Character.isDigit(source.getChar())) || !unaryAble) {
+                if (c == '(') {
+                    return new TokenVal(Token.OPEN_BRACKET, "(");
                 }
-                return new TokenVal(Token.CONST, sb.toString());
-            }
-            if (c == '(') {
-                return new TokenVal(Token.OPEN_BRACKET, "(");
-            }
-            if (c == ')') {
-                return new TokenVal(Token.CLOSE_BRACKET, ")");
-            }
-            Token ans = null;
-            String op = "";
-            for (Token token : Token.values()) {
-                if (token.operations.isEmpty()) {
-                    continue;
+                if (c == ')') {
+                    return new TokenVal(Token.CLOSE_BRACKET, ")");
                 }
-                for (Operation operation : token.operations) {
-                    if (operation.isUnary && !operation.isRight && !unaryAble) {
+                Token ans = null;
+                String op = "";
+                for (Token token : Token.values()) {
+                    if (token.operations.isEmpty()) {
                         continue;
                     }
-                    if (operation.stringVal.startsWith(String.valueOf(c))) {
-                        if (source.startsWith(operation.stringVal.substring(1))) {
-                            if (ans == null || op.length() < operation.stringVal.length()) {
-                                ans = token;
-                                op = operation.stringVal;
+                    for (Operation operation : token.operations) {
+                        if (operation.isUnary && !operation.isRight && !unaryAble) {
+                            continue;
+                        }
+                        if (operation.stringVal.startsWith(String.valueOf(c))) {
+                            if (source.startsWith(operation.stringVal.substring(1))) {
+                                if (ans == null || op.length() < operation.stringVal.length()) {
+                                    ans = token;
+                                    op = operation.stringVal;
+                                }
                             }
                         }
                     }
                 }
+                if (ans != null) {
+                    source.setStart(source.getStart() + op.length() - 1);
+                    return new TokenVal(ans, op);
+                }
             }
-            if (ans != null) {
-                source.setStart(source.getStart() + op.length() - 1);
-                return new TokenVal(ans, op);
-            }
-            if (Character.isLetter(c)) {
+            if (c == '-' || Character.isLetter(c) || Character.isDigit(c)) {
+                final boolean hasMinus = c == '-';
+                boolean hasLetter = Character.isLetter(c);
                 StringBuilder sb = new StringBuilder().append(c);
-                while (source.hasNext() && Character.isLetter(source.getChar())) {
+                while (source.hasNext() && (Character.isLetter(source.getChar())
+                        || Character.isDigit(source.getChar()))) {
+                    if (Character.isLetter(source.getChar())) {
+                        hasLetter = true;
+                    }
                     sb.append(source.nextChar());
                 }
-                return new TokenVal(Token.VARIABLE, sb.toString());
+                if (hasLetter && !hasMinus) {
+                    return new TokenVal(Token.VARIABLE, sb.toString());
+                } else if (!hasLetter) {
+                    return new TokenVal(Token.CONST, sb.toString());
+                }
             }
             throw new TokenException("Unexpected token: " + c + source.toString(4), source.getStart());
         }
@@ -142,7 +145,6 @@ public class ExpressionParser implements TripleParser {
             if (tokenVal == null) {
                 return prevPart;
             }
-
             Token token = tokenVal.token;
             switch (token) {
                 case OPEN_BRACKET:
@@ -162,7 +164,7 @@ public class ExpressionParser implements TripleParser {
                         throw new IncorrectVariableException("Unexpected variable", source.getStart());
                     }
                     if (tokenVal.value.isEmpty()
-                            || !enableVariables.contains(tokenVal.value.substring(
+                            || !enableVariablesEnds.contains(tokenVal.value.substring(
                                     tokenVal.value.length() - 1))) {
                         throw new IncorrectVariableException("Wrong variable name: " + tokenVal.value,
                                 source.getStart());
