@@ -96,7 +96,8 @@ public class ExpressionParser implements TripleParser {
                 }
                 if (!isFirstLetter) {
                     source.setStart(source.getStart() - sb.length() + 1);
-                    sb = new StringBuilder().append(c);
+                    sb.setLength(0);
+                    sb.append(c);
                 }
             }
             if (c == '(') {
@@ -264,7 +265,8 @@ public class ExpressionParser implements TripleParser {
             operation = op;
         }
         if (operation == null) {
-            throw new OperationException("Operation unexpected (null)", source.getStart());
+            throw new OperationException(String.format("Can't find optimal operation (%s)", token.operations),
+                    source.getStart());
         }
         return operation;
     }
