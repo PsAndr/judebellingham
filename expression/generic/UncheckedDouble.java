@@ -17,7 +17,7 @@ public class UncheckedDouble extends BaseNumber<UncheckedDouble> {
     }
 
     @Override
-    public UncheckedDouble sub(UncheckedDouble b) {
+    public UncheckedDouble sub(final UncheckedDouble b) {
         return new UncheckedDouble(value - b.value);
     }
 
@@ -37,7 +37,7 @@ public class UncheckedDouble extends BaseNumber<UncheckedDouble> {
     }
 
     @Override
-    public UncheckedDouble mod(UncheckedDouble b) {
+    public UncheckedDouble mod(final UncheckedDouble b) {
         return new UncheckedDouble(value % b.value);
     }
 
@@ -72,7 +72,7 @@ public class UncheckedDouble extends BaseNumber<UncheckedDouble> {
     }
 
     @Override
-    public int compareTo(UncheckedDouble o) {
+    public int compareTo(final UncheckedDouble o) {
         return Double.compare(value, o.value);
     }
 }

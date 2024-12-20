@@ -11,7 +11,7 @@ public class Divide<T extends BaseNumber<T>> extends BinaryExpression<T> {
     }
 
     @Override
-    protected T getOperationResult(T a, T b) {
+    protected T getOperationResult(final T a, final T b) {
         return a.divide(b);
     }
 

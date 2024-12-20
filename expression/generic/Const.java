@@ -10,7 +10,7 @@ public class Const<T extends BaseNumber<T>> implements AllExpression<T> {
     }
 
     @Override
-    public T evaluateNumber(Map<String, T> mp) {
+    public T evaluateNumber(final Map<String, T> mp) {
         return value;
     }
 

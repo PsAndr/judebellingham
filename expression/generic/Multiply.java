@@ -10,7 +10,7 @@ public class Multiply<T extends BaseNumber<T>> extends BinaryExpression<T> {
         return "*";
     }
     @Override
-    protected T getOperationResult(T a, T b) {
+    protected T getOperationResult(final T a, final T b) {
         return a.multiply(b);
     }
 

@@ -16,7 +16,7 @@ public class Negative<T extends BaseNumber<T>> extends UnaryExpression<T> {
     }
 
     @Override
-    protected T getOperationResult(T val) {
+    protected T getOperationResult(final T val) {
         return val.negate();
     }
 

@@ -11,5 +11,5 @@ public interface AllExpression<T extends BaseNumber<T>> {
         return toString();
     }
 
-    T evaluateNumber(Map<String, T> mp);
+    T evaluateNumber(final Map<String, T> mp);
 }

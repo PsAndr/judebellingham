@@ -17,7 +17,7 @@ public class Variable<T extends BaseNumber<T>> implements AllExpression<T> {
     }
 
     @Override
-    public T evaluateNumber(Map<String, T> mp) {
+    public T evaluateNumber(final Map<String, T> mp) {
         if (mp.containsKey(getNameId())) {
             return mp.get(getNameId());
         }
@@ -45,7 +45,7 @@ public class Variable<T extends BaseNumber<T>> implements AllExpression<T> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (obj instanceof Variable<?> var) {
             return name.equals(var.name);
         }

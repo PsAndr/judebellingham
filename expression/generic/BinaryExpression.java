@@ -22,7 +22,7 @@ public abstract class BinaryExpression<T extends BaseNumber<T>> implements AllEx
     }
 
     @Override
-    public T evaluateNumber(Map<String, T> mp) {
+    public T evaluateNumber(final Map<String, T> mp) {
         return getOperationResult(left.evaluateNumber(mp), right.evaluateNumber(mp));
     }
 
@@ -32,7 +32,7 @@ public abstract class BinaryExpression<T extends BaseNumber<T>> implements AllEx
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o instanceof BinaryExpression<?> other) {
             return left.equals(other.left) && right.equals(other.right)
                     && Objects.equals(getSign(), other.getSign());

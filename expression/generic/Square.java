@@ -16,7 +16,7 @@ public class Square<T extends BaseNumber<T>> extends UnaryExpression<T> {
     }
 
     @Override
-    protected T getOperationResult(T val) {
+    protected T getOperationResult(final T val) {
         return val.multiply(val);
     }
 

@@ -32,7 +32,7 @@ public class UncheckedInt extends BaseNumber<UncheckedInt> {
     }
 
     @Override
-    public UncheckedInt mod(UncheckedInt b) {
+    public UncheckedInt mod(final UncheckedInt b) {
         return new UncheckedInt(value % b.value);
     }
 
@@ -42,7 +42,7 @@ public class UncheckedInt extends BaseNumber<UncheckedInt> {
     }
 
     @Override
-    public UncheckedInt sub(UncheckedInt b) {
+    public UncheckedInt sub(final UncheckedInt b) {
         return new UncheckedInt(value - b.value);
     }
 
@@ -72,7 +72,7 @@ public class UncheckedInt extends BaseNumber<UncheckedInt> {
     }
 
     @Override
-    public int compareTo(UncheckedInt o) {
+    public int compareTo(final UncheckedInt o) {
         return Integer.compare(value, o.value);
     }
 }

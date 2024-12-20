@@ -16,7 +16,7 @@ public class Abs<T extends BaseNumber<T>> extends UnaryExpression<T> {
     }
 
     @Override
-    protected T getOperationResult(T val) {
+    protected T getOperationResult(final T val) {
         if (val.compareTo(val.negate()) < 0) {
             return val.negate();
         }

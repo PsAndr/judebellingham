@@ -43,7 +43,7 @@ public class UncheckedBigInteger extends BaseNumber<UncheckedBigInteger> {
     }
 
     @Override
-    public UncheckedBigInteger mod(UncheckedBigInteger b) {
+    public UncheckedBigInteger mod(final UncheckedBigInteger b) {
         return new UncheckedBigInteger(value.mod(b.value));
     }
 
@@ -78,7 +78,7 @@ public class UncheckedBigInteger extends BaseNumber<UncheckedBigInteger> {
     }
 
     @Override
-    public int compareTo(UncheckedBigInteger o) {
+    public int compareTo(final UncheckedBigInteger o) {
         return value.compareTo(o.value);
     }
 }

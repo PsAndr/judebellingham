@@ -51,7 +51,7 @@ public class UncheckedFixPoint extends BaseNumber<UncheckedFixPoint> {
     }
 
     @Override
-    public UncheckedFixPoint mod(UncheckedFixPoint b) {
+    public UncheckedFixPoint mod(final UncheckedFixPoint b) {
         return new UncheckedFixPoint(value % b.value, true);
     }
 
@@ -86,7 +86,7 @@ public class UncheckedFixPoint extends BaseNumber<UncheckedFixPoint> {
     }
 
     @Override
-    public int compareTo(UncheckedFixPoint o) {
+    public int compareTo(final UncheckedFixPoint o) {
         return Long.compare(value, o.value);
     }
 }

@@ -20,7 +20,7 @@ public abstract class UnaryExpression<T extends BaseNumber<T>> implements AllExp
     protected abstract T getOperationResult(final T val);
 
     @Override
-    public T evaluateNumber(Map<String, T> mp) {
+    public T evaluateNumber(final Map<String, T> mp) {
         return getOperationResult(expression.evaluateNumber(mp));
     }
 

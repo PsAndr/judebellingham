@@ -51,7 +51,7 @@ public class CheckedInt extends BaseNumber<CheckedInt> {
     }
 
     @Override
-    public CheckedInt mod(CheckedInt b) {
+    public CheckedInt mod(final CheckedInt b) {
         int res = value % b.value;
         return new CheckedInt(res);
     }
@@ -62,7 +62,7 @@ public class CheckedInt extends BaseNumber<CheckedInt> {
     }
 
     @Override
-    public CheckedInt sub(CheckedInt b) {
+    public CheckedInt sub(final CheckedInt b) {
         if (b.value > 0 && Integer.MIN_VALUE + b.value > value) {
             throw new ArithmeticException("overflow");
         }
@@ -98,7 +98,7 @@ public class CheckedInt extends BaseNumber<CheckedInt> {
     }
 
     @Override
-    public int compareTo(CheckedInt o) {
+    public int compareTo(final CheckedInt o) {
         return Integer.compare(value, o.value);
     }
 }
