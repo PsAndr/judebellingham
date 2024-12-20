@@ -68,7 +68,7 @@ public class UncheckedInt extends BaseNumber<UncheckedInt> {
 
     @Override
     public UncheckedInt copy() {
-        return new UncheckedInt(value);
+        return new UncheckedInt(this);
     }
 
     @Override

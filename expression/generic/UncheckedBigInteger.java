@@ -74,7 +74,7 @@ public class UncheckedBigInteger extends BaseNumber<UncheckedBigInteger> {
 
     @Override
     public UncheckedBigInteger copy() {
-        return new UncheckedBigInteger(value);
+        return new UncheckedBigInteger(this);
     }
 
     @Override

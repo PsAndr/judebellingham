@@ -68,7 +68,7 @@ public class UncheckedDouble extends BaseNumber<UncheckedDouble> {
 
     @Override
     public UncheckedDouble copy() {
-        return new UncheckedDouble(value);
+        return new UncheckedDouble(this);
     }
 
     @Override

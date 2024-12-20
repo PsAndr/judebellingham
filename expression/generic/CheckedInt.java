@@ -94,7 +94,7 @@ public class CheckedInt extends BaseNumber<CheckedInt> {
 
     @Override
     public CheckedInt copy() {
-        return new CheckedInt(value);
+        return new CheckedInt(this);
     }
 
     @Override
