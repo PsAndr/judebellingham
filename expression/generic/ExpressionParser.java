@@ -29,15 +29,9 @@ public class ExpressionParser<T extends BaseNumber<T>> implements GenericParser<
         Multiply(2, "*", false),
         Mod(2, "mod", false),
         Divide(2, "/", false),
-        Pow(4, "**", false),
-        Log(4, "//", false),
-        Factorial(6, "!", true, true),
-        LeftFactorial(7, "!", true),
         Minus(7, "-", true),
         Abs(7, "abs", true),
         Square(7, "square", true),
-        GCD(0, "gcd", false),
-        LCM(0, "lcm", false),
         ;
 
         public final int priority;
@@ -62,14 +56,9 @@ public class ExpressionParser<T extends BaseNumber<T>> implements GenericParser<
         MULTIPLY(List.of(Operation.Multiply)),
         MOD(List.of(Operation.Mod)),
         DIVIDE(List.of(Operation.Divide)),
-        POW(List.of(Operation.Pow)),
-        LOG(List.of(Operation.Log)),
-        FACTORIAL(List.of(Operation.Factorial, Operation.LeftFactorial)),
         MINUS(List.of(Operation.Minus, Operation.Subtract)),
         ABS(List.of(Operation.Abs)),
         SQUARE(List.of(Operation.Square)),
-        GCD(List.of(Operation.GCD)),
-        LCM(List.of(Operation.LCM)),
 
         CONST(List.of()),
         VARIABLE(List.of()),
@@ -193,7 +182,7 @@ public class ExpressionParser<T extends BaseNumber<T>> implements GenericParser<
                         throw new IncorrectVariableException("Wrong variable name: " + tokenVal.value,
                                 source.getStart());
                     }
-                    prevPart = new Variable<T>(tokenVal.value);
+                    prevPart = new Variable<>(tokenVal.value);
                     continue;
                 case CONST:
                     if (prevPart != null) {
@@ -264,10 +253,7 @@ public class ExpressionParser<T extends BaseNumber<T>> implements GenericParser<
         if (l == null) {
             throw new OperationException(op + ": wrong left operand", source.getStart());
         }
-        return switch (op) {
-            case Add -> new Add<>(l, l);
-            default -> throw new OperationException("Unknown right unary operation: " + op, source.getStart());
-        };
+        throw new OperationException("Unknown right unary operation: " + op, source.getStart());
     }
 
     private static <T extends BaseNumber<T>> Operation getOperation(final Token token,
