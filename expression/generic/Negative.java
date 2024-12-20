@@ -1,7 +1,5 @@
 package expression.generic;
 
-import java.util.Map;
-
 public class Negative<T extends BaseNumber<T>> extends UnaryExpression<T> {
     public Negative(final AllExpression<T> expression) {
         super(expression);

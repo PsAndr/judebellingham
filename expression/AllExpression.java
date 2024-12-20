@@ -1,7 +1,5 @@
 package expression;
 
-import java.util.Map;
-
 public interface AllExpression
         extends Expression, TripleExpression, FloatMapExpression {
     default int getPriority() { return 0; }

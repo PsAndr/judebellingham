@@ -1,7 +1,6 @@
 package expression.generic;
 
 import expression.parser.WrongExpressionException;
-
 import java.util.Map;
 
 public class GenericTabulator implements Tabulator {
@@ -34,7 +33,7 @@ public class GenericTabulator implements Tabulator {
         };
     }
 
-    public <T extends BaseNumber<T>> Object[][][] tabulate(final ExpressionParser<T> parser, final String expression,
+    private <T extends BaseNumber<T>> Object[][][] tabulate(final ExpressionParser<T> parser, final String expression,
                                                            final T x1, final int x2, final T y1, final int y2,
                                                            final T z1, final int z2) throws Exception {
         final Object[][][] answer = new Object[x2][y2][z2];
@@ -63,5 +62,29 @@ public class GenericTabulator implements Tabulator {
             xVal = xVal.next();
         }
         return answer;
+    }
+
+    public static void main(final String[] args) {
+        if (args.length != 2 || !args[0].startsWith("-")) {
+            System.err.println("Usage: GenericTabulator -<mode> <expression>");
+            return;
+        }
+        final String mode = args[0].substring(1);
+        final String expression = args[1];
+        final GenericTabulator tabulator = new GenericTabulator();
+        try {
+            final Object[][][] res = tabulator.tabulate(mode, expression, -2, 2, -2, 2, -2, 2);
+            for (int i = 0; i < res.length; i++) {
+                for (int j = 0; j < res[i].length; j++) {
+                    for (int k = 0; k < res[i].length; k++) {
+                        System.out.printf("%d, %d, %d (x, y, z) = %s%n", i - 2, j - 2, k - 2, res[i][j][k]);
+                    }
+                    System.out.println();
+                }
+                System.out.println();
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 }
