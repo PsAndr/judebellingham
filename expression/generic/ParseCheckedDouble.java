@@ -1,8 +1,8 @@
 package expression.generic;
 
-public class ParseCheckedDouble implements ParserNumber<CheckedDouble> {
+public class ParseCheckedDouble implements ParserNumber<UncheckedDouble> {
     @Override
-    public CheckedDouble parse(String s) {
-        return new CheckedDouble(Double.parseDouble(s));
+    public UncheckedDouble parse(String s) {
+        return new UncheckedDouble(Double.parseDouble(s));
     }
 }

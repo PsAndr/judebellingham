@@ -51,6 +51,12 @@ public class CheckedInt extends BaseNumber<CheckedInt> {
     }
 
     @Override
+    public CheckedInt mod(CheckedInt b) {
+        int res = value % b.value;
+        return new CheckedInt(res);
+    }
+
+    @Override
     public CheckedInt next() {
         return new CheckedInt(1).add(this);
     }
@@ -89,5 +95,10 @@ public class CheckedInt extends BaseNumber<CheckedInt> {
     @Override
     public CheckedInt copy() {
         return new CheckedInt(value);
+    }
+
+    @Override
+    public int compareTo(CheckedInt o) {
+        return Integer.compare(value, o.value);
     }
 }

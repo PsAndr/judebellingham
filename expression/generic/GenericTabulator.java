@@ -3,7 +3,6 @@ package expression.generic;
 import expression.parser.WrongExpressionException;
 
 import java.util.Map;
-import java.util.Set;
 
 public class GenericTabulator implements Tabulator {
     @Override
@@ -16,14 +15,22 @@ public class GenericTabulator implements Tabulator {
                     new CheckedInt(y1), y2 - y1 + 1,
                     new CheckedInt(z1), z2 - z1 + 1);
             case "d" -> tabulate(new ExpressionParser<>(new ParseCheckedDouble()), expression,
-                    new CheckedDouble(x1), x2 - x1 + 1,
-                    new CheckedDouble(y1), y2 - y1 + 1,
-                    new CheckedDouble(z1), z2 - z1 + 1);
+                    new UncheckedDouble(x1), x2 - x1 + 1,
+                    new UncheckedDouble(y1), y2 - y1 + 1,
+                    new UncheckedDouble(z1), z2 - z1 + 1);
             case "bi" -> tabulate(new ExpressionParser<>(new ParseCheckedBigInt()), expression,
-                    new CheckedBigInteger(x1), x2 - x1 + 1,
-                    new CheckedBigInteger(y1), y2 - y1 + 1,
-                    new CheckedBigInteger(z1), z2 - z1 + 1);
-            default -> throw new Exception("Unknown mode");
+                    new UncheckedBigInteger(x1), x2 - x1 + 1,
+                    new UncheckedBigInteger(y1), y2 - y1 + 1,
+                    new UncheckedBigInteger(z1), z2 - z1 + 1);
+            case "u" -> tabulate(new ExpressionParser<>(new ParseUncheckedInt()), expression,
+                    new UncheckedInt(x1), x2 - x1 + 1,
+                    new UncheckedInt(y1), y2 - y1 + 1,
+                    new UncheckedInt(z1), z2 - z1 + 1);
+            case "lf" -> tabulate(new ExpressionParser<>(new ParseCheckedFixPoint()), expression,
+                    new UncheckedFixPoint(x1), x2 - x1 + 1,
+                    new UncheckedFixPoint(y1), y2 - y1 + 1,
+                    new UncheckedFixPoint(z1), z2 - z1 + 1);
+            default -> throw new TabulatorException("Unknown mode: " + mode);
         };
     }
 
@@ -34,9 +41,8 @@ public class GenericTabulator implements Tabulator {
         final AllExpression<T> expr;
         try {
             expr = parser.parse(expression);
-        } catch (RuntimeException e) {
-            System.out.println("Error parsing expression (" + expression + "): " + e.getMessage());
-            throw new Exception();
+        } catch (WrongExpressionException e) {
+            throw new TabulatorException("Error parsing expression (" + expression + "): " + e.getMessage());
         }
 
         T xVal = x1.copy();
@@ -48,9 +54,7 @@ public class GenericTabulator implements Tabulator {
                     try {
                         answer[x][y][z] = expr.evaluateNumber(Map.of(
                                 "x", xVal, "y", yVal, "z", zVal)).getValue();
-                        // System.out.println(x + ", " + y + ", " + z + ": " + answer[x][y][z]);
                     } catch (RuntimeException ignored) {
-
                     }
                     zVal = zVal.next();
                 }

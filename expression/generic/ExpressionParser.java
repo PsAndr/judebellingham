@@ -1,6 +1,7 @@
 package expression.generic;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import expression.exceptions.*;
@@ -16,16 +17,25 @@ public class ExpressionParser<T extends BaseNumber<T>> implements GenericParser<
             "x", "y", "z"
     );
 
+    private final Map<Character, Character> bracketsMap = Map.of(
+            '(', ')',
+            '{', '}',
+            '[', ']'
+    );
+
     private enum Operation {
         Add(1, "+", false),
         Subtract(1, "-", false),
         Multiply(2, "*", false),
+        Mod(2, "mod", false),
         Divide(2, "/", false),
         Pow(4, "**", false),
         Log(4, "//", false),
         Factorial(6, "!", true, true),
         LeftFactorial(7, "!", true),
         Minus(7, "-", true),
+        Abs(7, "abs", true),
+        Square(7, "square", true),
         GCD(0, "gcd", false),
         LCM(0, "lcm", false),
         ;
@@ -50,11 +60,14 @@ public class ExpressionParser<T extends BaseNumber<T>> implements GenericParser<
     private enum Token {
         ADD(List.of(Operation.Add)),
         MULTIPLY(List.of(Operation.Multiply)),
+        MOD(List.of(Operation.Mod)),
         DIVIDE(List.of(Operation.Divide)),
         POW(List.of(Operation.Pow)),
         LOG(List.of(Operation.Log)),
         FACTORIAL(List.of(Operation.Factorial, Operation.LeftFactorial)),
         MINUS(List.of(Operation.Minus, Operation.Subtract)),
+        ABS(List.of(Operation.Abs)),
+        SQUARE(List.of(Operation.Square)),
         GCD(List.of(Operation.GCD)),
         LCM(List.of(Operation.LCM)),
 
@@ -106,11 +119,11 @@ public class ExpressionParser<T extends BaseNumber<T>> implements GenericParser<
                     sb.append(c);
                 }
             }
-            if (c == '(') {
-                return new TokenVal(Token.OPEN_BRACKET, "(");
+            if (bracketsMap.containsKey(c)) {
+                return new TokenVal(Token.OPEN_BRACKET, String.valueOf(c));
             }
-            if (c == ')') {
-                return new TokenVal(Token.CLOSE_BRACKET, ")");
+            if (bracketsMap.containsValue(c)) {
+                return new TokenVal(Token.CLOSE_BRACKET, String.valueOf(c));
             }
             Token ans = null;
             String op = "";
@@ -159,7 +172,7 @@ public class ExpressionParser<T extends BaseNumber<T>> implements GenericParser<
             switch (token) {
                 case OPEN_BRACKET:
                     prevPart = parse(source, -1);
-                    if (!source.hasNext() || source.nextChar() != ')') {
+                    if (!source.hasNext() || source.nextChar() != bracketsMap.get(tokenVal.value.charAt(0))) {
                         throw new BracketParseException("No close bracket", source.getStart());
                     }
                     continue;
@@ -226,6 +239,7 @@ public class ExpressionParser<T extends BaseNumber<T>> implements GenericParser<
             case Subtract -> new Subtract<>(l, r);
             case Multiply -> new Multiply<>(l, r);
             case Divide -> new Divide<>(l, r);
+            case Mod -> new Mod<>(l, r);
             default -> throw new OperationException("Unknown bin operation: " + op, source.getStart());
         };
     }
@@ -238,6 +252,8 @@ public class ExpressionParser<T extends BaseNumber<T>> implements GenericParser<
         }
         return switch (op) {
             case Minus -> new Negative<>(r);
+            case Abs -> new Abs<>(r);
+            case Square -> new Square<>(r);
             default -> throw new OperationException("Unknown left unary operation: " + op, source.getStart());
         };
     }
