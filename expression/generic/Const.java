@@ -1,21 +1,17 @@
-package expression;
+package expression.generic;
 
 import java.util.Map;
 
-public class Const implements AllExpression {
-    private final Number value;
+public class Const<T extends BaseNumber<T>> implements AllExpression<T> {
+    private final T value;
 
-    public Const(final int value) {
-        this.value = value;
-    }
-
-    public Const(final float value) {
+    public Const(final T value) {
         this.value = value;
     }
 
     @Override
-    public int evaluate(final int x) {
-        return value.intValue();
+    public T evaluateNumber(Map<String, T> mp) {
+        return value;
     }
 
     @Override
@@ -30,7 +26,7 @@ public class Const implements AllExpression {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Const c) {
+        if (obj instanceof Const<?> c) {
             return this.value.equals(c.value);
         }
         return false;
@@ -44,15 +40,5 @@ public class Const implements AllExpression {
     @Override
     public boolean isChangeOperation() {
         return true;
-    }
-
-    @Override
-    public float evaluateF(final Map<String, Float> variables) {
-        return value.floatValue();
-    }
-
-    @Override
-    public int evaluate(final int x, final int y, final int z) {
-        return evaluate(x);
     }
 }
