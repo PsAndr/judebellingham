@@ -11,8 +11,7 @@ import java.util.function.Function;
  */
 public final class ExpressionTest {
     public static final Selector SELECTOR = new Selector(ExpressionTest.class, "easy", "hard")
-            .variant("Base", v(Expression::tester))
-            .variant("FloatMap", v(FloatMapExpression::tester));
+            .variant("Base", v(Expression::tester));
 
     private ExpressionTest() {
     }
@@ -22,7 +21,6 @@ public final class ExpressionTest {
     }
 
     public static void main(final String... args) {
-        // SELECTOR.main(args);
-        TripleExpression.SELECTOR.main(args);
+        SELECTOR.main(args);
     }
 }

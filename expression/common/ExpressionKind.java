@@ -13,7 +13,7 @@ import java.util.List;
 public class ExpressionKind<E extends ToMiniString, C> {
     private final Type<C> type;
     private final Class<E> kind;
-    public final Variables<E> variables;
+    private final Variables<E> variables;
     private final Evaluator<E, C> evaluator;
 
     public ExpressionKind(

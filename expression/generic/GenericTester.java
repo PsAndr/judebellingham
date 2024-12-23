@@ -103,7 +103,6 @@ public class GenericTester extends Tester {
                                 counter.test(() -> {
                                     final Object expected = TestCounter.get(() -> f.apply(x, y, z)).either(e -> null, Function.identity());
                                     final Object actual = result[x - x1][y - y1][z - z1];
-
                                     counter.checkTrue(
                                             Objects.equals(actual, expected),
                                             "table[%d][%d][%d](x=%d, y=%d, z=%d]) = %s (expected %s)%n%s",

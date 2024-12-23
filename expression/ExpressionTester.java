@@ -93,8 +93,8 @@ public class ExpressionTester<E extends ToMiniString, C> extends Tester {
         final String expressionToString = Objects.requireNonNull(expression.toString());
         for (final Pair<ToMiniString, String> pair : prev) {
             counter.test(() -> {
-                final ToMiniString prev = pair.first;
-                final String prevToString = pair.second;
+                final ToMiniString prev = pair.first();
+                final String prevToString = pair.second();
                 final boolean equals = prevToString.equals(expressionToString);
                 assertTrue("Equals to " + prevToString, prev.equals(expression) == equals);
                 assertTrue("Equals to " + prevToString, expression.equals(prev) == equals);
@@ -163,7 +163,7 @@ public class ExpressionTester<E extends ToMiniString, C> extends Tester {
     }
 
     public ExpressionTester<E, C> basic(final Node<C> node, final E expression) {
-        final List<Pair<String, E>> variables = kind.variables.generate(random(), 3);
+        final List<Pair<String, E>> variables = kind.variables().generate(random(), 3);
         return basic(generator.test(new Expr<>(node, variables), kind.cast(expression)));
     }
 
@@ -177,8 +177,8 @@ public class ExpressionTester<E extends ToMiniString, C> extends Tester {
         return this;
     }
 
-    protected static <E> Op<E> variable(final String name, final E expected) {
-        return Op.of(name, expected);
+    protected static <E> Named<E> variable(final String name, final E expected) {
+        return Named.of(name, expected);
     }
 
     @FunctionalInterface
@@ -200,7 +200,7 @@ public class ExpressionTester<E extends ToMiniString, C> extends Tester {
         }
 
         private void test() {
-            final List<Pair<String, E>> variables = kind.variables.generate(random(), 3);
+            final List<Pair<String, E>> variables = kind.variables().generate(random(), 3);
             final List<String> names = Functional.map(variables, Pair::first);
             final E actual = kind.cast(this.actual.apply(names));
             final String full = mangle(this.full, names);
@@ -269,7 +269,7 @@ public class ExpressionTester<E extends ToMiniString, C> extends Tester {
         }
 
         private void testRandom() {
-            generator.testRandom(1, counter, kind.variables, expr -> {
+            generator.testRandom(1, counter, kind.variables(), expr -> {
                 final String full = renderer.render(expr, NodeRenderer.FULL);
                 final String mini = renderer.render(expr, NodeRenderer.MINI);
                 final E expected = this.expected.render(Unit.INSTANCE, expr);

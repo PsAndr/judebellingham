@@ -95,7 +95,8 @@ public class ExpressionParser<T extends BaseNumber<T>> implements GenericParser<
             final boolean hasMinus = c == '-';
             StringBuilder sb = new StringBuilder().append(c);
             if (c == '-' || isFirstLetter || Character.isDigit(c)) {
-                while (source.hasNext() && ((Character.isLetter(source.getChar()) && isFirstLetter)
+                while (source.hasNext()
+                        && (((Character.isLetter(source.getChar()) || source.getChar() == '_') && isFirstLetter)
                         || Character.isDigit(source.getChar()))) {
                     sb.append(source.nextChar());
                 }

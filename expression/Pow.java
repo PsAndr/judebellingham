@@ -12,12 +12,13 @@ public class Pow extends BinaryExpression {
 
     @Override
     protected int getOperationResult(final int a, final int b) {
-        int ans = 1;
-        for (int i = 1; i <= b; i++) {
+        if (b == 0) {
+            return 1;
+        }
+        int ans = getOperationResult(a, b / 2);
+        ans *= ans;
+        if (b % 2 == 1) {
             ans *= a;
-            if (ans == 0) {
-                break;
-            }
         }
         return ans;
     }
